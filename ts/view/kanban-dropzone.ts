@@ -1,7 +1,7 @@
-import KanbanApi from "../API/kanban-api";
-import createElement from "../utils/create-elements";
+import KanbanApi from "../API/kanban-api.ts";
+import createElement from "../utils/create-elements.ts";
 
-export default class DropZone {
+export default class KanbanDropZone {
   #dropZone: HTMLElement;
 
   constructor() {
@@ -12,7 +12,7 @@ export default class DropZone {
   }
 
   public static createDropZone(): HTMLElement {
-    return new DropZone().dropZone;
+    return new KanbanDropZone().dropZone;
   }
 
   #attachEventListeners() {
@@ -32,43 +32,40 @@ export default class DropZone {
     });
   }
 
-  #toggleDropZoneActive(active: boolean) {
-    this.dropZone.classList.toggle("kanban__drop-zone--active", active);
+  #toggleDropZoneActive(isActive: boolean) {
+    this.dropZone.classList.toggle("kanban__drop-zone--active", isActive);
   }
 
   #handleDrop(event: DragEvent) {
-    const columnElement = this.dropZone.closest(".kanban__column");
-    if (!columnElement) {
+    const kanbanColumn = this.dropZone.closest(".kanban__column");
+    if (!kanbanColumn) {
       console.error("Drop zone error: Could not find parent column");
       return;
     }
 
-    const columnId = Number(columnElement.getAttribute("data-id"));
+    const columnId = Number(kanbanColumn.getAttribute("data-id"));
     if (isNaN(columnId)) {
       console.error("Drop zone error: Column ID is not a number");
       return;
     }
     const dropZonesInColumn = [
-      ...columnElement.querySelectorAll(".kanban__dropzone"),
+      ...kanbanColumn.querySelectorAll(".kanban__dropzone"),
     ];
     const droppedIndex = dropZonesInColumn.indexOf(this.dropZone);
-    const itemId = Number(event.dataTransfer?.getData("text/plain"));
-    const droppedItemElement = document.querySelector(`[data-id="${itemId}"]`);
+    const taskId = Number(event.dataTransfer?.getData("text/plain"));
+    const droppedKanbanTask = document.querySelector(`[data-id="${taskId}"]`);
 
-    if (
-      !droppedItemElement ||
-      droppedItemElement === this.dropZone.parentElement
-    )
+    if (!droppedKanbanTask || droppedKanbanTask === this.dropZone.parentElement)
       return;
 
     const insertAfter = this.dropZone.parentElement?.classList.contains(
-      "kanban__column-item"
+      "kanban__task"
     )
       ? this.dropZone.parentElement
       : this.dropZone;
 
-    insertAfter.after(droppedItemElement);
-    KanbanApi.updateItem(itemId, { columnId, position: droppedIndex });
+    insertAfter.after(droppedKanbanTask);
+    KanbanApi.updateTask(taskId, { columnId, position: droppedIndex });
   }
 
   public get dropZone() {

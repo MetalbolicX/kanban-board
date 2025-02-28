@@ -1,103 +1,106 @@
+export type Task = {
+  id: number;
+  description: string;
+};
+
+export type Column = {
+  id: number;
+  tasks: Task[];
+};
+
 export default class KanbanApi {
-  public static getItems(columnId: number) {
-    const kanbanColumns = loadKanbanData();
-    const targetColumn = kanbanColumns.find((column) => column.id === columnId);
-    return targetColumn ? targetColumn.items : [];
+  public static getTasks(columnId: number) {
+    return loadKanban().find((column) => column.id === columnId)?.tasks ?? [];
   }
 
-  public static insertItem(columnId: number, content: string) {
-    const kanbanColumns = loadKanbanData();
-    const targetColumn = kanbanColumns.find((column) => column.id === columnId);
+  public static insertTask(columnId: number, description: string) {
+    const kanbanColumns = loadKanban();
+    const kanbanColumn = kanbanColumns.find((column) => column.id === columnId);
 
-    if (!targetColumn) throw new Error("Column not found");
+    if (!kanbanColumn) throw new Error("Column not found");
 
-    const newItem = {
+    const newTask = {
       id: Math.floor(Math.random() * 10000),
-      content,
+      description,
     };
 
-    targetColumn.items = [...targetColumn.items, newItem];
-    saveKanbanData(kanbanColumns);
-    return newItem;
+    kanbanColumn.tasks = [...kanbanColumn.tasks, newTask];
+    saveKanban(kanbanColumns);
+    return newTask;
   }
 
-  public static updateItem(
-    itemId: number,
+  public static updateTask(
+    taskId: number,
     updatedProperties: {
-      content?: string;
+      description?: string;
       columnId?: number;
       position?: number;
     }
   ) {
-    const kanbanColumns = loadKanbanData();
-    let itemToUpdate, sourceColumn;
+    const kanbanColumns = loadKanban();
+    let taskToUpdate, sourceColumn;
 
-    for (const column of kanbanColumns) {
-      const foundItem = column.items.find((item) => item.id === itemId);
-      if (foundItem) {
-        itemToUpdate = foundItem;
-        sourceColumn = column;
+    for (const kanbanColumn of kanbanColumns) {
+      const foundTask = kanbanColumn.tasks.find((task) => task.id === taskId);
+      if (foundTask) {
+        taskToUpdate = foundTask;
+        sourceColumn = kanbanColumn;
         break;
       }
     }
 
-    if (!itemToUpdate) throw new Error("Item not found");
+    if (!taskToUpdate) throw new Error("Task not found");
 
-    if (updatedProperties.content) {
-      itemToUpdate.content = updatedProperties.content;
-    }
+    if (updatedProperties.description)
+      taskToUpdate.description = updatedProperties.description;
 
     if (updatedProperties.columnId) {
-      const targetColumn = kanbanColumns.find(
+      const kanbanColumn = kanbanColumns.find(
         (column) => column.id === updatedProperties.columnId
       );
-      if (!targetColumn) throw new Error("Target column not found");
+      if (!kanbanColumn) throw new Error("Target column not found");
 
       // Remove from current column
-      sourceColumn!.items = sourceColumn!.items.filter(
-        (item) => item.id !== itemId
+      sourceColumn!.tasks = sourceColumn!.tasks.filter(
+        (task) => task.id !== taskId
       );
 
       // Insert into target column at specified position
       const insertPosition = updatedProperties.position ?? 0;
-      targetColumn.items.splice(insertPosition, 0, itemToUpdate);
+      kanbanColumn.tasks.splice(insertPosition, 0, taskToUpdate);
     }
 
-    saveKanbanData(kanbanColumns);
+    saveKanban(kanbanColumns);
   }
 
-  public static deleteItem(itemId: number) {
-    const kanbanColumns = loadKanbanData();
+  public static deleteTask(taskId: number) {
+    const kanbanColumns = loadKanban();
 
-    for (const column of kanbanColumns) {
-      const itemIndex = column.items.findIndex((item) => item.id === itemId);
-      if (itemIndex !== -1) {
-        column.items.splice(itemIndex, 1);
-        saveKanbanData(kanbanColumns);
+    for (const kanbanColumn of kanbanColumns) {
+      const taskIndex = kanbanColumn.tasks.findIndex(
+        (task) => task.id === taskId
+      );
+      if (taskIndex !== -1) {
+        kanbanColumn.tasks.splice(taskIndex, 1);
+        saveKanban(kanbanColumns);
         return;
       }
     }
 
-    throw new Error("Item not found");
+    throw new Error("Task not found");
   }
 }
 
-const loadKanbanData = (): {
-  id: number;
-  items: { id: number; content: string }[];
-}[] => {
-  const storedData = localStorage.getItem("kanban-data");
-  return storedData
-    ? JSON.parse(storedData)
+const loadKanban = (): Column[] => {
+  const storedKanban = localStorage.getItem("kanban-data");
+  return storedKanban
+    ? JSON.parse(storedKanban)
     : [
-        { id: 1, items: [] },
-        { id: 2, items: [] },
-        { id: 3, items: [] },
+        { id: 1, tasks: [] },
+        { id: 2, tasks: [] },
+        { id: 3, tasks: [] },
       ];
 };
 
-const saveKanbanData = (
-  kanbanColumns: { id: number; items: { id: number; content: string }[] }[]
-) => {
-  localStorage.setItem("kanban-data", JSON.stringify(kanbanColumns));
-};
+const saveKanban = (kanban: Column[]) =>
+  localStorage.setItem("kanban-data", JSON.stringify(kanban));
