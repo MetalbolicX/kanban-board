@@ -1,21 +1,21 @@
-export type Task = {
-  id: number;
-  description: string;
-};
-
-export type Column = {
-  id: number;
-  tasks: Task[];
-};
+import KanbanStorage from "../storage/kanban-storage.ts";
+import type { Task } from "../types/kanban-types.ts";
+import type { Storage } from "../interfaces/kanban-interfaces.ts";
 
 export default class KanbanApi {
-  public static getTasks(columnId: number) {
-    return loadKanban().find((column) => column.id === columnId)?.tasks ?? [];
+  #storage: KanbanStorage;
+
+  constructor(storage: Storage) {
+      this.#storage = new KanbanStorage(storage);
   }
 
-  public static insertTask(columnId: number, description: string) {
-    const kanbanColumns = loadKanban();
-    const kanbanColumn = kanbanColumns.find((column) => column.id === columnId);
+  public getTasks(columnId: number): Task[] {
+    return this.storage.loadKanban().find((column) => column.id === columnId)?.tasks ?? [];
+  }
+
+  public insertTask(columnId: number, description: string): Task {
+    const kanban = this.storage.loadKanban();
+    const kanbanColumn = kanban.find((column) => column.id === columnId);
 
     if (!kanbanColumn) throw new Error("Column not found");
 
@@ -25,26 +25,26 @@ export default class KanbanApi {
     };
 
     kanbanColumn.tasks = [...kanbanColumn.tasks, newTask];
-    saveKanban(kanbanColumns);
+    this.storage.saveKanban(kanban);
     return newTask;
   }
 
-  public static updateTask(
+  public updateTask(
     taskId: number,
     updatedProperties: {
       description?: string;
       columnId?: number;
       position?: number;
     }
-  ) {
-    const kanbanColumns = loadKanban();
+  ): void {
+    const kanban = this.storage.loadKanban();
     let taskToUpdate, sourceColumn;
 
-    for (const kanbanColumn of kanbanColumns) {
-      const foundTask = kanbanColumn.tasks.find((task) => task.id === taskId);
+    for (const column of kanban) {
+      const foundTask = column.tasks.find((task) => task.id === taskId);
       if (foundTask) {
         taskToUpdate = foundTask;
-        sourceColumn = kanbanColumn;
+        sourceColumn = column;
         break;
       }
     }
@@ -55,10 +55,10 @@ export default class KanbanApi {
       taskToUpdate.description = updatedProperties.description;
 
     if (updatedProperties.columnId) {
-      const kanbanColumn = kanbanColumns.find(
+      const column = kanban.find(
         (column) => column.id === updatedProperties.columnId
       );
-      if (!kanbanColumn) throw new Error("Target column not found");
+      if (!column) throw new Error("Target column not found");
 
       // Remove from current column
       sourceColumn!.tasks = sourceColumn!.tasks.filter(
@@ -67,40 +67,30 @@ export default class KanbanApi {
 
       // Insert into target column at specified position
       const insertPosition = updatedProperties.position ?? 0;
-      kanbanColumn.tasks.splice(insertPosition, 0, taskToUpdate);
+      column.tasks.splice(insertPosition, 0, taskToUpdate);
     }
 
-    saveKanban(kanbanColumns);
+    this.storage.saveKanban(kanban);
   }
 
-  public static deleteTask(taskId: number) {
-    const kanbanColumns = loadKanban();
+  public deleteTask(taskId: number): void {
+    const kanban = this.storage.loadKanban();
 
-    for (const kanbanColumn of kanbanColumns) {
-      const taskIndex = kanbanColumn.tasks.findIndex(
+    for (const column of kanban) {
+      const taskIndex = column.tasks.findIndex(
         (task) => task.id === taskId
       );
       if (taskIndex !== -1) {
-        kanbanColumn.tasks.splice(taskIndex, 1);
-        saveKanban(kanbanColumns);
+        column.tasks.splice(taskIndex, 1);
+        this.storage.saveKanban(kanban);
         return;
       }
     }
 
     throw new Error("Task not found");
   }
+
+  public get storage() {
+    return this.#storage;
+  }
 }
-
-const loadKanban = (): Column[] => {
-  const storedKanban = localStorage.getItem("kanban-data");
-  return storedKanban
-    ? JSON.parse(storedKanban)
-    : [
-        { id: 1, tasks: [] },
-        { id: 2, tasks: [] },
-        { id: 3, tasks: [] },
-      ];
-};
-
-const saveKanban = (kanban: Column[]) =>
-  localStorage.setItem("kanban-data", JSON.stringify(kanban));

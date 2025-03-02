@@ -1,7 +1,7 @@
-import KanbanBoard from "./view/kanban-board.ts";
+import KanbanBoard from "./components/kanban-board.ts";
+import LocalStorage from "./storage/local-storage.ts";
 
-const root = document.querySelector("main");
-if (!root) throw new Error("Main element not found");
+const kanbanContainer = document.querySelector("main");
+if (!kanbanContainer) throw new Error("Main element not found");
 
-const kanban = new KanbanBoard(root);
-kanban.renderColumns();
+const kanban = new KanbanBoard(kanbanContainer, new LocalStorage());

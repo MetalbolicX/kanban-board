@@ -1,7 +1,7 @@
 const createElement = (html: string): HTMLElement => {
-  const range = document.createRange();
-  const fragment = range.createContextualFragment(html);
-  const element = fragment.firstElementChild as HTMLElement;
+  const range = document.createRange(),
+    fragment = range.createContextualFragment(html),
+    element = fragment.firstElementChild as HTMLElement;
 
   if (!element) {
     throw new Error("Invalid HTML: No valid element found");
@@ -9,6 +9,5 @@ const createElement = (html: string): HTMLElement => {
 
   return element;
 };
-
 
 export default createElement;
