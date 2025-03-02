@@ -38,30 +38,15 @@ export default class KanbanTask {
       .on("dblclick", this.#handleDelete)
       .on("dragstart", (event) => this.#handleDragStart(event as DragEvent))
       .on("drop", (event) => this.#handleDrop(event as DragEvent))
-      .appendChild(new KanbanDropZone(this.api).root)
+      .appendChild(new KanbanDropZone(this.api).root as HTMLElement)
       .select(".kanban__task-input")
       .text(this.description)
       .on("blur", this.#handleBlur);
   }
 
-  // /**
-  //  * Attaches event listeners.
-  //  * 1. Blur event to handle the task description update.
-  //  * 2. Double click event to handle the task deletion.
-  //  * 3. The drag and drop events to handle move of the task between kanban columns.
-  //  */
-  // #attachEventListeners() {
-  //   this.elements.taskInput.addEventListener("blur", this.#handleBlur);
-  //   this.elements.root.addEventListener("dblclick", this.#handleDelete);
-  //   this.elements.root.addEventListener("dragstart", this.#handleDragStart);
-  //   this.elements.root.addEventListener("drop", this.#handleDrop);
-  // }
-
   #handleBlur = () => {
-    const taskInput = this.root.querySelector(".kanban__task-input");
-    if (!taskInput) return;
-
-    const newDescription = taskInput.textContent?.trim() || "";
+    const newDescription =
+      this.kanbanTask.select(".kanban__task-input").text() || "";
     if (newDescription === this.description) return;
 
     this.#description = newDescription;

@@ -28,7 +28,7 @@ export default class KanbanColumn {
     return new ElementBuilder(KanbanColumn.#COLUMN_HTML)
       .attr("data-id", this.id.toString())
       .select(".kanban__column-tasks")
-      .appendChild(new KanbanDropZone(this.api).root)
+      .appendChild(new KanbanDropZone(this.api).root as HTMLElement)
       .select(".kanban__column-title")
       .text(title)
       .select(".kanban__add-task")
@@ -55,7 +55,7 @@ export default class KanbanColumn {
     const kanbanTask = new KanbanTask(id, description, this.api);
     this.kanbanColumn
       .select(".kanban__column-tasks")
-      .appendChild(kanbanTask.root);
+      .appendChild(kanbanTask.root as HTMLElement);
   }
 
   public get root() {
