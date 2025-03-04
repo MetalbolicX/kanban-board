@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sticky notes</title>
     <link rel="stylesheet" href="main.css" type="text/css" />
+    <script src="./ts/components/confirm-dialog.ts"></script>
   </head>
   <body>
     <main class="kanban"></main>
+    <confirm-dialog id="confirm" icon="error">
+      <h3 slot="title">Are you sure you want to continue?</h3>
+      <p slot="description">This action cannot be undone.</p>
+    </confirm-dialog>
     <script type="module" src="./ts/main.ts"></script>
   </body>
 </html>

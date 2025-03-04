@@ -1,9 +1,11 @@
 import createElement from "./create-element.ts";
 
 /**
- * A utility class for constructing and manipulating DOM elements with a syntax similar to D3.js.
+ * @classdesc
+ * A utility class for building and manipulating DOM elements.
+ * It was inspired by the D3.js library and jQuery syntax.
  */
-export default class ElementBuilder {
+export default class Elym {
   #root: HTMLElement | SVGSVGElement;
   #nodes: (HTMLElement | SVGElement)[];
   #eventListeners = new WeakMap<
@@ -113,8 +115,23 @@ export default class ElementBuilder {
     return this;
   }
 
-  public html(htmlTemplate: string): this {
-    this.nodes.forEach((node) => node.appendChild(createElement(htmlTemplate)));
+  html(content?: string | Node): string | this {
+    // If no content is provided, return an array of innerHTML from all nodes
+    if (content === undefined) {
+      return this.nodes.map((node) => node.innerHTML).join("");
+    }
+
+    this.nodes.forEach((node) => {
+      if (typeof content === "string") {
+        const fragment = document
+          .createRange()
+          .createContextualFragment(content);
+        node.replaceChildren(fragment);
+      } else {
+        node.replaceChildren(content);
+      }
+    });
+
     return this;
   }
 
@@ -170,9 +187,9 @@ export default class ElementBuilder {
     return this;
   }
 
-  public prepend(parent: HTMLElement | ElementBuilder): this {
+  public prepend(parent: HTMLElement | Elym): this {
     this.nodes.forEach((node) => {
-      if (parent instanceof ElementBuilder) {
+      if (parent instanceof Elym) {
         parent.nodes.forEach((pNode) => pNode.prepend(node));
       } else {
         parent.prepend(node);
@@ -181,13 +198,13 @@ export default class ElementBuilder {
     return this;
   }
 
-  public addClass(className: string): this {
-    this.nodes.forEach((node) => node.classList.add(className));
+  public addClass(...className: string[]): this {
+    this.nodes.forEach((node) => node.classList.add(...className));
     return this;
   }
 
-  public removeClass(className: string): this {
-    this.nodes.forEach((node) => node.classList.remove(className));
+  public removeClass(...className: string[]): this {
+    this.nodes.forEach((node) => node.classList.remove(...className));
     return this;
   }
 
@@ -205,9 +222,9 @@ export default class ElementBuilder {
     return this;
   }
 
-  public appendTo(parent: HTMLElement | ElementBuilder): this {
+  public appendTo(parent: HTMLElement | Elym): this {
     this.nodes.forEach((node) => {
-      if (parent instanceof ElementBuilder) {
+      if (parent instanceof Elym) {
         parent.nodes.forEach((pNode) => pNode.appendChild(node));
       } else {
         parent.appendChild(node);
@@ -237,7 +254,7 @@ export default class ElementBuilder {
     return this;
   }
 
-  public call(callback: (builder: ElementBuilder) => void): this {
+  public call(callback: (builder: Elym) => void): this {
     callback(this);
     return this;
   }
@@ -258,8 +275,8 @@ export default class ElementBuilder {
     return this;
   }
 
-  public clone(): ElementBuilder {
-    const clone = new ElementBuilder(this.root.outerHTML);
+  public clone(): Elym {
+    const clone = new Elym(this.root.outerHTML);
     this.nodes.forEach((node, index) => {
       const clonedNode = clone.nodes[index];
 
@@ -311,7 +328,7 @@ export default class ElementBuilder {
    * @param easing - (Optional) Easing function, default is "ease".
    * @example
    * ```ts
-   * const builder = new ElementBuilder('<div style="width:100px; height:100px; background:red;"></div>');
+   * const builder = new Elym('<div style="width:100px; height:100px; background:red;"></div>');
    * // Transition width and background color
    * builder.transition(500, { width: "200px", backgroundColor: "blue" });
    * // Transition opacity and transform with an ease-out effect

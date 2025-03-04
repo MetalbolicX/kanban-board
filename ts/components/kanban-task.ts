@@ -1,6 +1,7 @@
 import KanbanApi from "../API/kanban-api.ts";
 import KanbanDropZone from "./kanban-dropzone.ts";
-import ElementBuilder from "../utils/element-builder.ts";
+import Elym from "../utils/elym.ts";
+import KanbanSubject from "../interfaces/kanban-subject.ts";
 
 /**
  * @classdesc
@@ -8,7 +9,7 @@ import ElementBuilder from "../utils/element-builder.ts";
  * In addition it adds the interactivity to the task which includes
  * updating the task description, deleting the task, and dragging the task.
  */
-export default class KanbanTask {
+export default class KanbanTask extends KanbanSubject {
   static readonly #TASK_HTML = /*html*/ `
     <div class="kanban__task" draggable="true">
       <div class="kanban__task-input" contenteditable="true"></div>
@@ -17,7 +18,7 @@ export default class KanbanTask {
   #api: KanbanApi;
   #description: string;
   #id: number;
-  #kanbanTask: ElementBuilder;
+  #kanbanTask: Elym;
 
   /**
    * Creates a new Kanban task element which will contain information and its interaction.
@@ -26,6 +27,7 @@ export default class KanbanTask {
    * @param {KanbanApi} api - The API to interact with the storage.
    */
   constructor(id: number, description: string, api: KanbanApi) {
+    super();
     this.#id = id;
     this.#description = description;
     this.#api = api;
@@ -33,7 +35,7 @@ export default class KanbanTask {
   }
 
   #initRootElement() {
-    return new ElementBuilder(KanbanTask.#TASK_HTML)
+    return new Elym(KanbanTask.#TASK_HTML)
       .attr("data-id", this.id.toString())
       .on("dblclick", this.#handleDelete)
       .on("dragstart", (event) => this.#handleDragStart(event as DragEvent))
@@ -55,7 +57,10 @@ export default class KanbanTask {
 
   #handleDelete = () => {
     if (!confirm("Are you sure you want to delete this item?")) return;
-
+    this.notifyObservers("taskDeleted", {
+      taskId: this.id,
+      description: this.description,
+    });
     this.api.deleteTask(this.id);
     this.kanbanTask.remove();
   };
@@ -63,6 +68,7 @@ export default class KanbanTask {
   #handleDragStart(event: DragEvent) {
     if (typeof this.id !== "number") return;
     event.dataTransfer?.setData("text/plain", this.id.toString());
+    this.notifyObservers("taskDragStarted", this.id);
   }
 
   #handleDrop(event: DragEvent) {

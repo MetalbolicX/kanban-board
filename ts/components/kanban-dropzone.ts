@@ -1,17 +1,19 @@
 import KanbanApi from "../API/kanban-api.ts";
-import ElementBuilder from "../utils/element-builder.ts";
+import Elym from "../utils/elym.ts";
+import KanbanSubject from "../interfaces/kanban-subject.ts";
 
-export default class KanbanDropZone {
+export default class KanbanDropZone extends KanbanSubject {
   #api: KanbanApi;
-  #dropZone: ElementBuilder;
+  #dropZone: Elym;
 
   constructor(api: KanbanApi) {
+    super();
     this.#api = api;
     this.#dropZone = this.#initRootElement();
   }
 
   #initRootElement() {
-    return new ElementBuilder(/*html*/ `<div class='kanban__dropzone'></div>`)
+    return new Elym(/*html*/ `<div class='kanban__dropzone'></div>`)
       .on("dragover", (event) => {
         event.preventDefault();
         this.#toggleDropZoneActive(true);
@@ -58,6 +60,7 @@ export default class KanbanDropZone {
 
     insertAfter.after(droppedKanbanTask);
     this.api.updateTask(taskId, { columnId, position: droppedIndex });
+    this.notifyObservers("taskMoved", { taskId, columnId, position: droppedIndex });
   }
 
   public get root() {

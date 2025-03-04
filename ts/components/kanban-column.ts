@@ -1,12 +1,13 @@
 import KanbanTask from "./kanban-task.ts";
 import KanbanApi from "../API/kanban-api.ts";
-import ElementBuilder from "../utils/element-builder.ts";
+import Elym from "../utils/elym.ts";
 import KanbanDropZone from "./kanban-dropzone.ts";
+import { Observer } from "../interfaces/kanban-interfaces.ts";
 
 import type { Task } from "../types/kanban-types.ts";
 import type { Storage } from "../interfaces/kanban-interfaces.ts";
 
-export default class KanbanColumn {
+export default class KanbanColumn implements Observer {
   static readonly #COLUMN_HTML = /*html*/ `
     <div class="kanban__column">
       <h3 class="kanban__column-title"></h3>
@@ -14,7 +15,7 @@ export default class KanbanColumn {
       <button class="kanban__add-task" type="button">+ Add</button>
     </div>
   `;
-  #kanbanColumn: ElementBuilder;
+  #kanbanColumn: Elym;
   #id: number;
   #api: KanbanApi;
 
@@ -22,10 +23,23 @@ export default class KanbanColumn {
     this.#id = id;
     this.#api = new KanbanApi(storage);
     this.#kanbanColumn = this.#initRootElement(title);
+    this.#initTasks();
+  }
+
+  public renderTask({ id, description }: Task) {
+    const kanbanTask = new KanbanTask(id, description, this.api);
+    kanbanTask.addObserver(this);
+    this.kanbanColumn
+      .select(".kanban__column-tasks")
+      .appendChild(kanbanTask.root as HTMLElement);
+  }
+
+  public update(eventType: string, data: any) {
+    console.log(`%c${eventType}`, "color: #f0f; font-weight: bold", data);
   }
 
   #initRootElement(title: string) {
-    return new ElementBuilder(KanbanColumn.#COLUMN_HTML)
+    return new Elym(KanbanColumn.#COLUMN_HTML)
       .attr("data-id", this.id.toString())
       .select(".kanban__column-tasks")
       .appendChild(new KanbanDropZone(this.api).root as HTMLElement)
@@ -33,6 +47,10 @@ export default class KanbanColumn {
       .text(title)
       .select(".kanban__add-task")
       .on("click", this.#handleAddTask);
+  }
+
+  #initTasks() {
+    for (const task of this.api.getTasks(this.id)) this.renderTask(task);
   }
 
   #handleAddTask = () => {
@@ -50,13 +68,6 @@ export default class KanbanColumn {
 
     this.renderTask(newTask);
   };
-
-  public renderTask({ id, description }: Task) {
-    const kanbanTask = new KanbanTask(id, description, this.api);
-    this.kanbanColumn
-      .select(".kanban__column-tasks")
-      .appendChild(kanbanTask.root as HTMLElement);
-  }
 
   public get root() {
     return this.#kanbanColumn.getRootNode();
