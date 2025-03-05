@@ -50,10 +50,10 @@ class ConfirmDialog extends HTMLElement {
     ) as HTMLButtonElement;
 
     // Add ARIA attributes
-    this.#dialog.setAttribute("role", "dialog");
-    this.#dialog.setAttribute("aria-modal", "true");
-    this.#dialog.setAttribute("aria-labelledby", "dialog-title");
-    this.#dialog.setAttribute("aria-describedby", "dialog-description");
+    this._dialog.setAttribute("role", "dialog");
+    this._dialog.setAttribute("aria-modal", "true");
+    this._dialog.setAttribute("aria-labelledby", "dialog-title");
+    this._dialog.setAttribute("aria-describedby", "dialog-description");
   }
 
   /**
@@ -237,8 +237,8 @@ class ConfirmDialog extends HTMLElement {
    * Lifecycle method - Called when the element is added to the DOM.
    */
   public connectedCallback(): void {
-    this.#closeButton.addEventListener("click", this.#handleClose);
-    this.#confirmButton.addEventListener("click", this.#handleConfirm);
+    this._closeButton.addEventListener("click", this.#handleClose);
+    this._confirmButton.addEventListener("click", this.#handleConfirm);
   }
 
   /**
@@ -246,8 +246,8 @@ class ConfirmDialog extends HTMLElement {
    * Ensures event listeners are properly removed.
    */
   public disconnectedCallback(): void {
-    this.#closeButton.removeEventListener("click", this.#handleClose);
-    this.#confirmButton.removeEventListener("click", this.#handleConfirm);
+    this._closeButton.removeEventListener("click", this.#handleClose);
+    this._confirmButton.removeEventListener("click", this.#handleConfirm);
   }
 
   /**
@@ -283,16 +283,16 @@ class ConfirmDialog extends HTMLElement {
    * Opens the dialog.
    */
   public show(): void {
-    this.dialog.showModal();
-    this.dialog.classList.add("show");
+    this._dialog.showModal();
+    this._dialog.classList.add("show");
   }
 
   /**
    * Closes the dialog.
    */
   public hide(): void {
-    this.dialog.classList.remove("show");
-    setTimeout(() => this.dialog.close(), 300);
+    this._dialog.classList.remove("show");
+    setTimeout(() => this._dialog.close(), 300);
   }
 
   /**
@@ -437,7 +437,7 @@ class ConfirmDialog extends HTMLElement {
    * @protected
    * @returns {HTMLDialogElement} The dialog element.
    */
-  protected get dialog(): HTMLDialogElement {
+  protected get _dialog(): HTMLDialogElement {
     return this.#dialog;
   }
 
@@ -446,7 +446,7 @@ class ConfirmDialog extends HTMLElement {
    * @protected
    * @returns {HTMLButtonElement} The confirm button element.
    */
-  protected get confirmButton(): HTMLButtonElement {
+  protected get _confirmButton(): HTMLButtonElement {
     return this.#confirmButton;
   }
 
@@ -455,7 +455,7 @@ class ConfirmDialog extends HTMLElement {
    * @protected
    * @returns {HTMLButtonElement} The close button element.
    */
-  protected get closeButton(): HTMLButtonElement {
+  protected get _closeButton(): HTMLButtonElement {
     return this.#closeButton;
   }
 
