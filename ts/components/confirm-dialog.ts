@@ -2,7 +2,7 @@
  * A custom confirm dialog web component.
  *
  * @example
- * The following example demonstrates how to use the `ConfirmDialog` component:
+ * HTML usage:
  * ```html
  * <confirm-dialog id="dialog" icon="warning">
  *  <h3 slot="title">Confirm Action</h3>
@@ -11,9 +11,9 @@
  * ```
  *
  * @example
- * The following example demonstrates how to use the `ConfirmDialog` component with TypeScript:
+ * TypeScript usage:
  * ```ts
- * const dialog = document.getElementById("dialog");
+ * const dialog = document.getElementById("dialog") as ConfirmDialog;
  * dialog.addEventListener("confirm", () => console.log("Confirmed!"));
  * dialog.show();
  * ```
@@ -47,10 +47,17 @@ class ConfirmDialog extends HTMLElement {
     this.#closeButton = this.shadowRoot!.getElementById(
       "confirm-dialog__actions-cancel"
     ) as HTMLButtonElement;
+
+    // Add ARIA attributes
+    this.#dialog.setAttribute("role", "dialog");
+    this.#dialog.setAttribute("aria-modal", "true");
+    this.#dialog.setAttribute("aria-labelledby", "dialog-title");
+    this.#dialog.setAttribute("aria-describedby", "dialog-description");
   }
 
   /**
    * Returns the CSS styles for the component.
+   * @returns {string} The CSS styles.
    */
   public static get styles(): string {
     return /*css*/ `
@@ -65,10 +72,10 @@ class ConfirmDialog extends HTMLElement {
         border-radius: 0.5em;
         box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
         padding: 1rem;
-        animation: fade-out 0.7s ease-out;
+        animation: fade-out 0.5s ease-out;
 
         &.show {
-          animation: fade-in 0.7s ease-out;
+          animation: fade-in 0.5s ease-out;
 
           &::backdrop {
             background: rgba(0, 0, 0, 0.35);
@@ -191,6 +198,7 @@ class ConfirmDialog extends HTMLElement {
 
   /**
    * Returns the HTML template for the component.
+   * @returns {string} The HTML template.
    */
   public static get template(): string {
     return /*html*/ `
@@ -201,7 +209,7 @@ class ConfirmDialog extends HTMLElement {
               <slot name="title" class="confirm-dialog__header-title"></slot>
               <span class="confirm-dialog__header-icon">
                 <svg viewBox="0 0 24 24">
-                  <path d="M0 0h24v24H0z"></path>
+                  <path></path>
                 </svg>
               </span>
             </legend>
@@ -216,8 +224,12 @@ class ConfirmDialog extends HTMLElement {
     `;
   }
 
+  /**
+   * Observed attributes for the component.
+   * @returns {string[]} The list of observed attributes.
+   */
   public static get observedAttributes(): string[] {
-    return ["icon", "open"];
+    return ["icon", "open", "confirm-label", "cancel-label"];
   }
 
   /**
@@ -237,14 +249,33 @@ class ConfirmDialog extends HTMLElement {
     this.#confirmButton.removeEventListener("click", this.#handleConfirm);
   }
 
+  /**
+   * Called when an observed attribute has been added, removed, updated, or replaced.
+   * @param {string} name - The name of the attribute.
+   * @param {string | null} oldValue - The old value of the attribute.
+   * @param {string | null} newValue - The new value of the attribute.
+   */
   public attributeChangedCallback(
     name: string,
     oldValue: string | null,
     newValue: string | null
   ): void {
     if (oldValue === newValue) return;
-    if (name === "icon") this.#updateIcon(newValue);
-    if (name === "open") !newValue ? this.hide() : this.show();
+
+    switch (name) {
+      case "icon":
+        this.#updateIcon(newValue);
+        break;
+      case "open":
+        !newValue ? this.hide() : this.show();
+        break;
+      case "confirm-label":
+        this.#confirmButton.textContent = newValue || "Confirm";
+        break;
+      case "cancel-label":
+        this.#closeButton.textContent = newValue || "Close";
+        break;
+    }
   }
 
   /**
@@ -265,7 +296,7 @@ class ConfirmDialog extends HTMLElement {
 
   /**
    * Handles confirmation action.
-   * @param event - The click event
+   * @param {Event} event - The click event.
    * @private
    */
   #handleConfirm = (event: Event): void => {
@@ -283,44 +314,115 @@ class ConfirmDialog extends HTMLElement {
     this.hide();
   };
 
+  /**
+   * Dispatches the confirm event.
+   * @private
+   */
   #handleConfirmClick() {
     this.dispatchEvent(
       new CustomEvent("confirm", { bubbles: true, composed: true })
     );
   }
 
+  /**
+   * Updates the icon based on the type.
+   * @param {string | null} type - The type of the icon.
+   * @private
+   */
   #updateIcon(type: string | null) {
-    const icons: Record<string, string> = {
-      success: `<svg fill="green" viewBox="0 0 24 24"><path d="M9 16.2l-4.2-4.2L3 13l6 6L21 7l-1.8-1.8L9 16.2z"/></svg>`,
-      warning: `<svg fill="orange" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm11-6h2v2h-2v-2zm0-6h2v4h-2v-4z"/></svg>`,
-      error: `<svg fill="red" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-11h-2v6h2v-6zm0 8h-2v2h2v-2z"/></svg>`,
-    };
+    const icons = new Map<string, { color: string; path: string }>(
+      [
+        ["success", { color: "green", path: "M9 16.2l-4.2-4.2L3 13l6 6L21 7l-1.8-1.8L9 16.2z" }],
+        ["warning", { color: "orange", path: "M1 21h22L12 2 1 21zm11-6h2v2h-2v-2zm0-6h2v4h-2v-4z" }],
+        ["error", { color: "red", path: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-3.59 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-11h-2v6h2v-6zm0 8h-2v2h2v-2z" }],
+      ]
+    );
 
-    const iconContainer = this.shadowRoot!.querySelector(".confirm-dialog__header-icon");
-    if (iconContainer)
-      iconContainer.innerHTML = type && icons[type] ? icons[type] : "";
+    const iconContainer = this.shadowRoot!.querySelector(".confirm-dialog__header-icon svg");
+    const pathElement = iconContainer?.querySelector("path");
+
+    if (iconContainer && pathElement) {
+      const icon = icons.get(type || "");
+      if (icon) {
+        iconContainer.setAttribute("fill", icon.color);
+        pathElement.setAttribute("d", icon.path);
+      } else {
+        iconContainer.removeAttribute("fill");
+        pathElement.removeAttribute("d");
+      }
+    }
   }
 
+  /**
+   * Gets the icon attribute.
+   * @returns {string | null} The icon attribute.
+   */
   public get icon(): string | null {
     return this.getAttribute("icon");
   }
 
+  /**
+   * Sets the icon attribute.
+   * @param {string | null} value - The new value for the icon attribute.
+   */
   public set icon(value: string | null) {
     if (value) this.setAttribute("icon", value);
     else this.removeAttribute("icon");
   }
 
+  /**
+   * Gets the open attribute.
+   * @returns {boolean} The open attribute.
+   */
   public get open(): boolean {
     return this.hasAttribute("open");
   }
 
+  /**
+   * Sets the open attribute.
+   * @param {boolean} value - The new value for the open attribute.
+   */
   public set open(value: boolean) {
     if (value) this.setAttribute("open", "true");
     else this.removeAttribute("open");
   }
 
   /**
+   * Gets the confirm button label.
+   * @returns {string} The confirm button label.
+   */
+  public get confirmLabel(): string {
+    return this.getAttribute("confirm-label") || "Confirm";
+  }
+
+  /**
+   * Sets the confirm button label.
+   * @param {string} value - The new value for the confirm button label.
+   */
+  public set confirmLabel(value: string) {
+    this.setAttribute("confirm-label", value);
+  }
+
+  /**
+   * Gets the cancel button label.
+   * @returns {string} The cancel button label.
+   */
+  public get cancelLabel(): string {
+    return this.getAttribute("cancel-label") || "Close";
+  }
+
+  /**
+   * Sets the cancel button label.
+   * @param {string} value - The new value for the cancel button label.
+   */
+  public set cancelLabel(value: string) {
+    this.setAttribute("cancel-label", value);
+  }
+
+  /**
    * Protected getter for the dialog element.
+   * @protected
+   * @returns {HTMLDialogElement} The dialog element.
    */
   protected get dialog(): HTMLDialogElement {
     return this.#dialog;
@@ -328,6 +430,8 @@ class ConfirmDialog extends HTMLElement {
 
   /**
    * Protected getter for the confirm button element.
+   * @protected
+   * @returns {HTMLButtonElement} The confirm button element.
    */
   protected get confirmButton(): HTMLButtonElement {
     return this.#confirmButton;
@@ -335,6 +439,8 @@ class ConfirmDialog extends HTMLElement {
 
   /**
    * Protected getter for the close button element.
+   * @protected
+   * @returns {HTMLButtonElement} The close button element.
    */
   protected get closeButton(): HTMLButtonElement {
     return this.#closeButton;
@@ -342,6 +448,7 @@ class ConfirmDialog extends HTMLElement {
 
   /**
    * Gets the current confirm callback.
+   * @returns {(() => void) | null} The confirm callback.
    */
   public get onConfirm(): (() => void) | null {
     return this.#onConfirm;
@@ -349,6 +456,7 @@ class ConfirmDialog extends HTMLElement {
 
   /**
    * Sets a custom function to be called when the confirm button is clicked.
+   * @param {(() => void) | null} callback - The confirm callback.
    */
   public set onConfirm(callback: (() => void) | null) {
     this.#onConfirm = callback;
