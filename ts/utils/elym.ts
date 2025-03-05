@@ -14,6 +14,10 @@ export default class Elym {
   >();
   #data = new WeakMap<HTMLElement | SVGElement, any>();
 
+  /**
+   * Creates an instance of Elym.
+   * @param {string} htmlTemplate - The HTML template to create the root element.
+   */
   constructor(htmlTemplate: string) {
     const rootElement = createElement(htmlTemplate);
     if (
@@ -25,23 +29,26 @@ export default class Elym {
       throw new Error("Invalid root element created");
     }
     this.#root = rootElement;
-
     this.#nodes = [this.root];
   }
 
   /**
    * Selects a single element within the constructed DOM structure.
+   * @param {string} selector - The CSS selector to match the element.
+   * @returns {this} The current instance for chaining.
    */
   public select(selector: string): this {
-    const selected = this.root.querySelector(selector);
-    if (selected) {
-      this.#nodes = [selected as HTMLElement];
+    const selectedElement = this.root.querySelector(selector);
+    if (selectedElement) {
+      this.#nodes = [selectedElement as HTMLElement];
     }
     return this;
   }
 
   /**
    * Selects multiple elements within the constructed DOM structure.
+   * @param {string} selector - The CSS selector to match the elements.
+   * @returns {this} The current instance for chaining.
    */
   public selectAll(selector: string): this {
     this.#nodes = Array.from(
@@ -50,6 +57,12 @@ export default class Elym {
     return this;
   }
 
+  /**
+   * Gets or sets an attribute on the selected elements.
+   * @param {string} attribute - The attribute name.
+   * @param {string} [value] - The attribute value.
+   * @returns {this | string | null} The current instance for chaining or the attribute value.
+   */
   public attr(attribute: string): string | null;
   public attr(attribute: string, value: string): this;
   public attr(attribute: string, value?: string): this | string | null {
@@ -60,6 +73,11 @@ export default class Elym {
     return this;
   }
 
+  /**
+   * Gets or sets the text content of the selected elements.
+   * @param {string} [value] - The text content.
+   * @returns {this | string} The current instance for chaining or the text content.
+   */
   public text(): string;
   public text(value: string): this;
   public text(value?: string): string | this {
@@ -70,18 +88,34 @@ export default class Elym {
     return this;
   }
 
+  /**
+   * Appends a child element to the selected elements.
+   * @param {HTMLElement} child - The child element to append.
+   * @returns {this} The current instance for chaining.
+   */
   public appendChild(child: HTMLElement): this {
     this.nodes.forEach((node) => node.appendChild(child));
     return this;
   }
 
+  /**
+   * Appends multiple child elements to the selected elements.
+   * @param {...HTMLElement[]} children - The child elements to append.
+   * @returns {this} The current instance for chaining.
+   */
   public appendChildren(...children: HTMLElement[]): this {
-    this.nodes.forEach((node) =>
-      children.forEach((child) => node.appendChild(child))
-    );
+    const fragment = document.createDocumentFragment();
+    children.forEach((child) => fragment.appendChild(child));
+    this.nodes.forEach((node) => node.appendChild(fragment.cloneNode(true)));
     return this;
   }
 
+  /**
+   * Gets or sets a CSS style property on the selected elements.
+   * @param {string} property - The CSS property name.
+   * @param {string} [value] - The CSS property value.
+   * @returns {this | string | null} The current instance for chaining or the CSS property value.
+   */
   public style(property: string): string | null;
   public style(property: string, value: string): this;
   public style(
@@ -95,16 +129,22 @@ export default class Elym {
           : null;
       }
       this.nodes.forEach((node) => node.style.setProperty(property, value!));
-    } else {
-      this.nodes.forEach((node) => {
-        Object.entries(property).forEach(([key, val]) =>
-          node.style.setProperty(key, val)
-        );
-      });
+      return this;
     }
+    this.nodes.forEach((node) => {
+      Object.entries(property).forEach(([key, val]) =>
+        node.style.setProperty(key, val)
+      );
+    });
     return this;
   }
 
+  /**
+   * Gets or sets a property on the selected elements.
+   * @param {string} property - The property name.
+   * @param {T} [value] - The property value.
+   * @returns {this | T} The current instance for chaining or the property value.
+   */
   public property<T = any>(property: string): T;
   public property<T = any>(property: string, value: T): this;
   public property<T = any>(property: string, value?: T): this | T {
@@ -115,8 +155,12 @@ export default class Elym {
     return this;
   }
 
-  html(content?: string | Node): string | this {
-    // If no content is provided, return an array of innerHTML from all nodes
+  /**
+   * Gets or sets the HTML content of the selected elements.
+   * @param {string | Node} [content] - The HTML content.
+   * @returns {this | string} The current instance for chaining or the HTML content.
+   */
+  public html(content?: string | Node): string | this {
     if (content === undefined) {
       return this.nodes.map((node) => node.innerHTML).join("");
     }
@@ -127,14 +171,21 @@ export default class Elym {
           .createRange()
           .createContextualFragment(content);
         node.replaceChildren(fragment);
-      } else {
-        node.replaceChildren(content);
+        return;
       }
+      node.replaceChildren(content);
     });
 
     return this;
   }
 
+  /**
+   * Adds an event listener to the selected elements.
+   * @param {string} event - The event type.
+   * @param {EventListener} callback - The event listener callback.
+   * @param {boolean | AddEventListenerOptions} [options] - The event listener options.
+   * @returns {this} The current instance for chaining.
+   */
   public on(
     event: string,
     callback: EventListener,
@@ -153,6 +204,11 @@ export default class Elym {
     return this;
   }
 
+  /**
+   * Removes an event listener from the selected elements.
+   * @param {string} event - The event type.
+   * @returns {this} The current instance for chaining.
+   */
   public off(event: string): this {
     const [eventType, namespace] = event.split(".");
     this.nodes.forEach((node) => {
@@ -160,7 +216,6 @@ export default class Elym {
       if (!eventMap) return;
 
       if (namespace) {
-        // Remove only namespaced events
         for (const key of eventMap.keys()) {
           if (
             key.startsWith(eventType + ".") &&
@@ -174,65 +229,101 @@ export default class Elym {
             eventMap.delete(key);
           }
         }
-      } else {
-        // Remove all events of the specified type
-        eventMap
-          .get(eventType)
-          ?.forEach((callback) =>
-            node.removeEventListener(eventType, callback)
-          );
-        eventMap.delete(eventType);
+        return;
       }
+      eventMap
+        .get(eventType)
+        ?.forEach((callback) => node.removeEventListener(eventType, callback));
+      eventMap.delete(eventType);
     });
     return this;
   }
 
+  /**
+   * Prepends the selected elements to a parent element.
+   * @param {HTMLElement | Elym} parent - The parent element.
+   * @returns {this} The current instance for chaining.
+   */
   public prepend(parent: HTMLElement | Elym): this {
     this.nodes.forEach((node) => {
       if (parent instanceof Elym) {
-        parent.nodes.forEach((pNode) => pNode.prepend(node));
-      } else {
-        parent.prepend(node);
+        parent.nodes.forEach((parentNode) => parentNode.prepend(node));
+        return;
       }
+      parent.prepend(node);
     });
     return this;
   }
 
-  public addClass(...className: string[]): this {
-    this.nodes.forEach((node) => node.classList.add(...className));
+  /**
+   * Adds one or more class names to the selected elements.
+   * @param {...string[]} classNames - The class names to add.
+   * @returns {this} The current instance for chaining.
+   */
+  public addClass(...classNames: string[]): this {
+    this.nodes.forEach((node) => node.classList.add(...classNames));
     return this;
   }
 
-  public removeClass(...className: string[]): this {
-    this.nodes.forEach((node) => node.classList.remove(...className));
+  /**
+   * Removes one or more class names from the selected elements.
+   * @param {...string[]} classNames - The class names to remove.
+   * @returns {this} The current instance for chaining.
+   */
+  public removeClass(...classNames: string[]): this {
+    this.nodes.forEach((node) => node.classList.remove(...classNames));
     return this;
   }
 
-  public insertBefore(reference: HTMLElement): this {
+  /**
+   * Inserts the selected elements before a reference element.
+   * @param {HTMLElement} referenceElement - The reference element.
+   * @returns {this} The current instance for chaining.
+   */
+  public insertBefore(referenceElement: HTMLElement): this {
     this.nodes.forEach((node) =>
-      reference.parentNode?.insertBefore(node, reference)
+      referenceElement.parentNode?.insertBefore(node, referenceElement)
     );
     return this;
   }
 
-  public insertAfter(reference: HTMLElement): this {
+  /**
+   * Inserts the selected elements after a reference element.
+   * @param {HTMLElement} referenceElement - The reference element.
+   * @returns {this} The current instance for chaining.
+   */
+  public insertAfter(referenceElement: HTMLElement): this {
     this.nodes.forEach((node) =>
-      reference.parentNode?.insertBefore(node, reference.nextSibling)
+      referenceElement.parentNode?.insertBefore(
+        node,
+        referenceElement.nextSibling
+      )
     );
     return this;
   }
 
+  /**
+   * Appends the selected elements to a parent element.
+   * @param {HTMLElement | Elym} parent - The parent element.
+   * @returns {this} The current instance for chaining.
+   */
   public appendTo(parent: HTMLElement | Elym): this {
     this.nodes.forEach((node) => {
       if (parent instanceof Elym) {
-        parent.nodes.forEach((pNode) => pNode.appendChild(node));
-      } else {
-        parent.appendChild(node);
+        parent.nodes.forEach((parentNode) => parentNode.appendChild(node));
+        return;
       }
+      parent.appendChild(node);
     });
     return this;
   }
 
+  /**
+   * Checks if the selected elements have a class or toggles a class based on a boolean value.
+   * @param {string} className - The class name.
+   * @param {boolean} [value] - The boolean value to toggle the class.
+   * @returns {this | boolean} The current instance for chaining or the class presence.
+   */
   public classed(className: string): boolean;
   public classed(className: string, value: boolean): this;
   public classed(className: string, value?: boolean): this | boolean {
@@ -245,6 +336,11 @@ export default class Elym {
     return this;
   }
 
+  /**
+   * Iterates over the selected elements and executes a callback for each element.
+   * @param {function} callback - The callback function.
+   * @returns {this} The current instance for chaining.
+   */
   public each(
     callback: (node: HTMLElement | SVGElement, index: number) => void
   ): this {
@@ -254,11 +350,20 @@ export default class Elym {
     return this;
   }
 
+  /**
+   * Calls a callback function with the current instance.
+   * @param {function} callback - The callback function.
+   * @returns {this} The current instance for chaining.
+   */
   public call(callback: (builder: Elym) => void): this {
     callback(this);
     return this;
   }
 
+  /**
+   * Removes the selected elements from the DOM.
+   * @returns {this} The current instance for chaining.
+   */
   public remove(): this {
     this.nodes.forEach((node) => {
       const eventMap = this.eventListeners.get(node);
@@ -275,6 +380,10 @@ export default class Elym {
     return this;
   }
 
+  /**
+   * Clones the current instance, including event listeners and data.
+   * @returns {Elym} The cloned instance.
+   */
   public clone(): Elym {
     const clone = new Elym(this.root.outerHTML);
     this.nodes.forEach((node, index) => {
@@ -305,17 +414,22 @@ export default class Elym {
 
   /**
    * Toggles a class or attribute based on a boolean condition.
+   * @param {string} attributeOrClass - The attribute or class name.
+   * @param {boolean} state - The boolean state.
+   * @returns {this} The current instance for chaining.
    */
   public toggle(attributeOrClass: string, state: boolean): this {
     this.nodes.forEach((node) => {
       if (node instanceof HTMLElement) {
         if (node.hasAttribute(attributeOrClass)) {
-          state
-            ? node.setAttribute(attributeOrClass, "")
-            : node.removeAttribute(attributeOrClass);
-        } else {
-          node.classList.toggle(attributeOrClass, state);
+          if (state) {
+            node.setAttribute(attributeOrClass, "");
+            return;
+          }
+          node.removeAttribute(attributeOrClass);
+          return;
         }
+        node.classList.toggle(attributeOrClass, state);
       }
     });
     return this;
@@ -323,9 +437,10 @@ export default class Elym {
 
   /**
    * Applies a CSS transition effect to the selected elements.
-   * @param duration - Transition duration in milliseconds.
-   * @param properties - CSS properties to animate.
-   * @param easing - (Optional) Easing function, default is "ease".
+   * @param {number} duration - Transition duration in milliseconds.
+   * @param {Partial<CSSStyleDeclaration>} properties - CSS properties to animate.
+   * @param {string} [easing="ease"] - Easing function, default is "ease".
+   * @returns {this} The current instance for chaining.
    * @example
    * ```ts
    * const builder = new Elym('<div style="width:100px; height:100px; background:red;"></div>');
@@ -352,6 +467,12 @@ export default class Elym {
     return this;
   }
 
+  /**
+   * Binds data to the selected elements and optionally executes a callback.
+   * @param {T[]} dataset - The data to bind.
+   * @param {function} [callback] - The callback function.
+   * @returns {this} The current instance for chaining.
+   */
   public data<T>(
     dataset: T[],
     callback?: (node: HTMLElement | SVGElement, datum: T, index: number) => void
@@ -365,36 +486,72 @@ export default class Elym {
     return this;
   }
 
+  /**
+   * Resets the selected elements to the root element.
+   * @returns {this} The current instance for chaining.
+   */
   public backToRoot(): this {
     this.#nodes = [this.root];
     return this;
   }
 
+  /**
+   * Gets the root element.
+   * @returns {HTMLElement | SVGSVGElement} The root element.
+   */
   public getRootNode() {
     return this.root;
   }
 
+  /**
+   * Gets the first selected element.
+   * @returns {HTMLElement | SVGElement} The first selected element.
+   */
   public getNode() {
     const [node] = this.nodes;
     return node;
   }
 
+  /**
+   * Gets all selected elements.
+   * @returns {Array<HTMLElement | SVGElement>} The selected elements.
+   */
   public getNodes() {
     return [...this.nodes];
   }
 
+  /**
+   * Gets the data bound to a specific element.
+   * @param {HTMLElement | SVGElement} node - The element.
+   * @returns {any} The data bound to the element.
+   */
   public getData(node: HTMLElement | SVGElement) {
     return this.#data.get(node);
   }
 
+  /**
+   * Gets the root element.
+   * @protected
+   * @returns {HTMLElement | SVGSVGElement} The root element.
+   */
   protected get root() {
     return this.#root;
   }
 
+  /**
+   * Gets the selected elements.
+   * @protected
+   * @returns {Array<HTMLElement | SVGElement>} The selected elements.
+   */
   protected get nodes() {
     return this.#nodes;
   }
 
+  /**
+   * Gets the event listeners map.
+   * @protected
+   * @returns {WeakMap<HTMLElement | SVGElement, Map<string, EventListener[]>>} The event listeners map.
+   */
   protected get eventListeners() {
     return this.#eventListeners;
   }
