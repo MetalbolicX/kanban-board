@@ -1,6 +1,6 @@
 import KanbanTask from "./kanban-task.ts";
 import KanbanApi from "../API/kanban-api.ts";
-import Elym from "../utils/elym.ts";
+import { Elym } from "elym";
 import KanbanDropZone from "./kanban-dropzone.ts";
 import { Observer } from "../interfaces/kanban-interfaces.ts";
 
