@@ -10,6 +10,6 @@ const kanban = new KanbanBoard(kanbanContainer, new LocalStorage());
 
 const confirm = document.getElementById("confirm");
 if (!confirm) throw new Error("Confirm element not found");
-confirm?.show();
-// confirm.onConfirm = () => {console.log("Confirmed!");};
+// confirm?.show();
+confirm.open = true;
 confirm.addEventListener("confirm", () => console.log("Confirmed using listener!"));

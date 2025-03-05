@@ -40,12 +40,12 @@ class ConfirmDialog extends HTMLElement {
     this.shadowRoot!.append(template.content.cloneNode(true));
 
     // Get elements
-    this.#dialog = this.shadowRoot!.querySelector("dialog")!;
+    this.#dialog = this.shadowRoot!.querySelector(".confirm-dialog")!;
     this.#confirmButton = this.shadowRoot!.getElementById(
-      "confirmBtn"
+      "confirm-dialog__actions-confirm"
     ) as HTMLButtonElement;
     this.#closeButton = this.shadowRoot!.getElementById(
-      "closeBtn"
+      "confirm-dialog__actions-cancel"
     ) as HTMLButtonElement;
   }
 
@@ -59,18 +59,19 @@ class ConfirmDialog extends HTMLElement {
         --confirm-hover-color: #388e3c;
       }
 
-      .confirm-modal {
+      .confirm-dialog {
         width: 30%;
         border: none;
         border-radius: 0.5em;
-        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.35);
+        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
         padding: 1rem;
+        animation: fade-out 0.7s ease-out;
 
-        &:open {
-          opacity: 1 transform: translate(-50%, -50%);
+        &.show {
+          animation: fade-in 0.7s ease-out;
 
           &::backdrop {
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.35);
           }
         }
 
@@ -88,66 +89,103 @@ class ConfirmDialog extends HTMLElement {
             align-items: center;
             justify-content: space-between;
             font-weight: bold;
-
-            #icon {
-              display: inline-block;
-              width: 1.5em;
-              height: 1.5em;
-              margin-left: 1em;
-            }
           }
 
           slot {
             text-align: justify;
           }
 
-          slot[name="title"] {
+          .confirm-dialog__header-title {
             font-size: 1.5em;
           }
 
-          slot[name="description"] {
+          .confirm-dialog__header-description {
             font-size: 1em;
             padding-left: 0.5em;
             border-left: 1px solid #888;
             display: -webkit-box;
           }
 
-          .buttons {
+          .confirm-dialog__header-icon {
+            display: inline-block;
+            width: 1.5em;
+            height: 1.5em;
+            margin-left: 1em;
+
+            svg {
+              width: 2em;
+              height: 2em;
+            }
+          }
+
+          .confirm-dialog__actions {
             display: flex;
             justify-content: flex-end;
-            gap: 0.5rem;
+            gap: 0.5em;
 
             button {
               font-size: 1em;
-              padding: 0.5rem 1rem;
+              padding: 0.5em 1em;
               border-radius: 0.25em;
               border: 1px solid transparent;
 
-              &:focus {
+              &::focus {
                 outline: none;
                 border: 1px solid #888;
               }
             }
+          }
 
-            #confirmBtn {
-              background-color: var(--confirm-color);
-              color: white;
+          #confirm-dialog__actions-confirm {
+            background-color: var(--confirm-color);
+            color: white;
 
-              &:hover {
-                background-color: var(--confirm-hover-color);
-              }
+            &:hover {
+              background-color: var(--confirm-hover-color);
             }
+          }
 
-            #closeBtn {
-              background-color: #ddd;
-              color: black;
+          #confirm-dialog__actions-cancel {
+            background-color: #ddd;
+            color: black;
 
-              &:hover {
-                background-color: #ccc;
-              }
+            &:hover {
+              background-color: #ccc;
             }
           }
         }
+      }
+
+      @keyframes fade-in {
+        0% {
+          opacity 0;
+          transform: scaleY(0);
+          display: none;
+          visibility: hidden;
+        }
+        100% {
+          opacity 1;
+          transform: scaleY(1);
+          display: block;
+          visibility: visible;
+        }
+      }
+
+      @keyframes fade-out {
+        0% {
+          opacity: 1;
+          transform: scaleY(1);
+          display: block;
+          visibility: visible;
+        }
+        100% {
+          opacity: 0;
+          transform: scaleY(0);
+          display: none;
+          visibility: hidden;
+        }
+      }
+    }
     `;
   }
 
@@ -156,18 +194,22 @@ class ConfirmDialog extends HTMLElement {
    */
   public static get template(): string {
     return /*html*/ `
-      <dialog class="confirm-modal">
+      <dialog class="confirm-dialog">
         <form method="dialog">
-          <fieldset>
+          <fieldset class="confirm-dialog__header">
             <legend>
-              <slot name="title"></slot>
-              <span id="icon"></span>
+              <slot name="title" class="confirm-dialog__header-title"></slot>
+              <span class="confirm-dialog__header-icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M0 0h24v24H0z"></path>
+                </svg>
+              </span>
             </legend>
-            <slot name="description"></slot>
+            <slot name="description" class="confirm-dialog__header-description"></slot>
           </fieldset>
-          <fieldset class="buttons">
-            <button type="submit" id="confirmBtn">Confirm</button>
-            <button type="submit" id="closeBtn" autofocus>Close</button>
+          <fieldset class="confirm-dialog__actions">
+            <button type="submit" id="confirm-dialog__actions-confirm">Confirm</button>
+            <button type="submit" id="confirm-dialog__actions-cancel" autofocus>Close</button>
           </fieldset>
         </form>
       </dialog>
@@ -175,7 +217,7 @@ class ConfirmDialog extends HTMLElement {
   }
 
   public static get observedAttributes(): string[] {
-    return ["icon"];
+    return ["icon", "open"];
   }
 
   /**
@@ -202,20 +244,23 @@ class ConfirmDialog extends HTMLElement {
   ): void {
     if (oldValue === newValue) return;
     if (name === "icon") this.#updateIcon(newValue);
+    if (name === "open") !newValue ? this.hide() : this.show();
   }
 
   /**
    * Opens the dialog.
    */
   public show(): void {
-    this.#dialog.showModal();
+    this.dialog.showModal();
+    this.dialog.classList.add("show");
   }
 
   /**
    * Closes the dialog.
    */
   public hide(): void {
-    this.#dialog.close();
+    this.dialog.classList.remove("show");
+    setTimeout(() => this.dialog.close(), 300);
   }
 
   /**
@@ -246,14 +291,32 @@ class ConfirmDialog extends HTMLElement {
 
   #updateIcon(type: string | null) {
     const icons: Record<string, string> = {
-      success: `<svg fill="green" width="24" height="24" viewBox="0 0 24 24"><path d="M9 16.2l-4.2-4.2L3 13l6 6L21 7l-1.8-1.8L9 16.2z"/></svg>`,
-      warning: `<svg fill="orange" width="24" height="24" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm11-6h2v2h-2v-2zm0-6h2v4h-2v-4z"/></svg>`,
-      error: `<svg fill="red" width="24" height="24" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-11h-2v6h2v-6zm0 8h-2v2h2v-2z"/></svg>`,
+      success: `<svg fill="green" viewBox="0 0 24 24"><path d="M9 16.2l-4.2-4.2L3 13l6 6L21 7l-1.8-1.8L9 16.2z"/></svg>`,
+      warning: `<svg fill="orange" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm11-6h2v2h-2v-2zm0-6h2v4h-2v-4z"/></svg>`,
+      error: `<svg fill="red" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm1-11h-2v6h2v-6zm0 8h-2v2h2v-2z"/></svg>`,
     };
 
-    const iconContainer = this.shadowRoot!.getElementById("icon");
+    const iconContainer = this.shadowRoot!.querySelector(".confirm-dialog__header-icon");
     if (iconContainer)
       iconContainer.innerHTML = type && icons[type] ? icons[type] : "";
+  }
+
+  public get icon(): string | null {
+    return this.getAttribute("icon");
+  }
+
+  public set icon(value: string | null) {
+    if (value) this.setAttribute("icon", value);
+    else this.removeAttribute("icon");
+  }
+
+  public get open(): boolean {
+    return this.hasAttribute("open");
+  }
+
+  public set open(value: boolean) {
+    if (value) this.setAttribute("open", "true");
+    else this.removeAttribute("open");
   }
 
   /**
