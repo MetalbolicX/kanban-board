@@ -23,6 +23,7 @@ class ConfirmDialog extends HTMLElement {
   #confirmButton: HTMLButtonElement;
   #closeButton: HTMLButtonElement;
   #onConfirm: (() => void) | null = null;
+  #onCancel: (() => void) | null = null;
 
   constructor() {
     super();
@@ -311,6 +312,8 @@ class ConfirmDialog extends HTMLElement {
    * @private
    */
   #handleClose = (): void => {
+    if (this.onCancel) this.onCancel();
+    this.#handleCancelClick();
     this.hide();
   };
 
@@ -321,6 +324,16 @@ class ConfirmDialog extends HTMLElement {
   #handleConfirmClick() {
     this.dispatchEvent(
       new CustomEvent("confirm", { bubbles: true, composed: true })
+    );
+  }
+
+  /**
+   * Dispatches the cancel event.
+   * @private
+   */
+  #handleCancelClick() {
+    this.dispatchEvent(
+      new CustomEvent("cancel", { bubbles: true, composed: true })
     );
   }
 
@@ -460,6 +473,22 @@ class ConfirmDialog extends HTMLElement {
    */
   public set onConfirm(callback: (() => void) | null) {
     this.#onConfirm = callback;
+  }
+
+  /**
+   * Gets the current cancel callback.
+   * @returns {(() => void) | null} The cancel callback.
+   */
+  public get onCancel(): (() => void) | null {
+    return this.#onCancel;
+  }
+
+  /**
+   * Sets a custom function to be called when the cancel button is clicked.
+   * @param {(() => void) | null} callback - The cancel callback.
+   */
+  public set onCancel(callback: (() => void) | null) {
+    this.#onCancel = callback;
   }
 }
 
