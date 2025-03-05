@@ -29,7 +29,7 @@ export default class Elym {
       throw new Error("Invalid root element created");
     }
     this.#root = rootElement;
-    this.#nodes = [this.root];
+    this.#nodes = [this._root];
   }
 
   /**
@@ -38,7 +38,7 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public select(selector: string): this {
-    const selectedElement = this.root.querySelector(selector);
+    const selectedElement = this._root.querySelector(selector);
     if (selectedElement) {
       this.#nodes = [selectedElement as HTMLElement];
     }
@@ -52,7 +52,7 @@ export default class Elym {
    */
   public selectAll(selector: string): this {
     this.#nodes = Array.from(
-      this.root.querySelectorAll(selector)
+      this._root.querySelectorAll(selector)
     ) as HTMLElement[];
     return this;
   }
@@ -66,10 +66,11 @@ export default class Elym {
   public attr(attribute: string): string | null;
   public attr(attribute: string, value: string): this;
   public attr(attribute: string, value?: string): this | string | null {
-    if (value === undefined) {
-      return this.nodes.length ? this.nodes[0].getAttribute(attribute) : null;
+    if (!value) {
+      const [firstNode] = this._nodes;
+      return this.nodes.length ? firstNode.getAttribute(attribute) : null;
     }
-    this.nodes.forEach((node) => node.setAttribute(attribute, value));
+    this._nodes.forEach((node) => node.setAttribute(attribute, value));
     return this;
   }
 
@@ -81,10 +82,11 @@ export default class Elym {
   public text(): string;
   public text(value: string): this;
   public text(value?: string): string | this {
-    if (value === undefined) {
-      return this.nodes[0]?.textContent || "";
+    if (!value) {
+      const [firstNode] = this._nodes;
+      return firstNode?.textContent || "";
     }
-    this.nodes.forEach((node) => (node.textContent = value));
+    this._nodes.forEach((node) => (node.textContent = value));
     return this;
   }
 
@@ -94,7 +96,7 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public appendChild(child: HTMLElement): this {
-    this.nodes.forEach((node) => node.appendChild(child));
+    this._nodes.forEach((node) => node.appendChild(child));
     return this;
   }
 
@@ -106,7 +108,7 @@ export default class Elym {
   public appendChildren(...children: HTMLElement[]): this {
     const fragment = document.createDocumentFragment();
     children.forEach((child) => fragment.appendChild(child));
-    this.nodes.forEach((node) => node.appendChild(fragment.cloneNode(true)));
+    this._nodes.forEach((node) => node.appendChild(fragment.cloneNode(true)));
     return this;
   }
 
@@ -124,14 +126,15 @@ export default class Elym {
   ): this | string | null {
     if (typeof property === "string") {
       if (value === undefined) {
+        const [firstNode] = this._nodes;
         return this.nodes.length
-          ? this.nodes[0].style.getPropertyValue(property)
+          ? firstNode.style.getPropertyValue(property)
           : null;
       }
-      this.nodes.forEach((node) => node.style.setProperty(property, value!));
+      this._nodes.forEach((node) => node.style.setProperty(property, value!));
       return this;
     }
-    this.nodes.forEach((node) => {
+    this._nodes.forEach((node) => {
       Object.entries(property).forEach(([key, val]) =>
         node.style.setProperty(key, val)
       );
@@ -149,9 +152,10 @@ export default class Elym {
   public property<T = any>(property: string, value: T): this;
   public property<T = any>(property: string, value?: T): this | T {
     if (value === undefined) {
-      return this.nodes.length ? (this.nodes[0] as any)[property] : undefined;
+      const [firstNode] = this._nodes;
+      return this.nodes.length ? (firstNode as any)[property] : undefined;
     }
-    this.nodes.forEach((node) => ((node as any)[property] = value));
+    this._nodes.forEach((node) => ((node as any)[property] = value));
     return this;
   }
 
@@ -162,10 +166,10 @@ export default class Elym {
    */
   public html(content?: string | Node): string | this {
     if (content === undefined) {
-      return this.nodes.map((node) => node.innerHTML).join("");
+      return this._nodes.map((node) => node.innerHTML).join("");
     }
 
-    this.nodes.forEach((node) => {
+    this._nodes.forEach((node) => {
       if (typeof content === "string") {
         const fragment = document
           .createRange()
@@ -192,12 +196,12 @@ export default class Elym {
     options?: boolean | AddEventListenerOptions
   ): this {
     const [eventType, namespace] = event.split(".");
-    this.nodes.forEach((node) => {
+    this._nodes.forEach((node) => {
       node.addEventListener(eventType, callback, options);
-      if (!this.eventListeners.has(node)) {
-        this.eventListeners.set(node, new Map());
+      if (!this._eventListeners.has(node)) {
+        this._eventListeners.set(node, new Map());
       }
-      const eventMap = this.eventListeners.get(node)!;
+      const eventMap = this._eventListeners.get(node)!;
       const eventKey = namespace ? `${eventType}.${namespace}` : eventType;
       eventMap.set(eventKey, [...(eventMap.get(eventKey) || []), callback]);
     });
@@ -211,8 +215,8 @@ export default class Elym {
    */
   public off(event: string): this {
     const [eventType, namespace] = event.split(".");
-    this.nodes.forEach((node) => {
-      const eventMap = this.eventListeners.get(node);
+    this._nodes.forEach((node) => {
+      const eventMap = this._eventListeners.get(node);
       if (!eventMap) return;
 
       if (namespace) {
@@ -245,9 +249,9 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public prepend(parent: HTMLElement | Elym): this {
-    this.nodes.forEach((node) => {
+    this._nodes.forEach((node) => {
       if (parent instanceof Elym) {
-        parent.nodes.forEach((parentNode) => parentNode.prepend(node));
+        parent._nodes.forEach((parentNode) => parentNode.prepend(node));
         return;
       }
       parent.prepend(node);
@@ -261,7 +265,7 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public addClass(...classNames: string[]): this {
-    this.nodes.forEach((node) => node.classList.add(...classNames));
+    this._nodes.forEach((node) => node.classList.add(...classNames));
     return this;
   }
 
@@ -271,7 +275,7 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public removeClass(...classNames: string[]): this {
-    this.nodes.forEach((node) => node.classList.remove(...classNames));
+    this._nodes.forEach((node) => node.classList.remove(...classNames));
     return this;
   }
 
@@ -281,7 +285,7 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public insertBefore(referenceElement: HTMLElement): this {
-    this.nodes.forEach((node) =>
+    this._nodes.forEach((node) =>
       referenceElement.parentNode?.insertBefore(node, referenceElement)
     );
     return this;
@@ -293,7 +297,7 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public insertAfter(referenceElement: HTMLElement): this {
-    this.nodes.forEach((node) =>
+    this._nodes.forEach((node) =>
       referenceElement.parentNode?.insertBefore(
         node,
         referenceElement.nextSibling
@@ -308,9 +312,9 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public appendTo(parent: HTMLElement | Elym): this {
-    this.nodes.forEach((node) => {
+    this._nodes.forEach((node) => {
       if (parent instanceof Elym) {
-        parent.nodes.forEach((parentNode) => parentNode.appendChild(node));
+        parent._nodes.forEach((parentNode) => parentNode.appendChild(node));
         return;
       }
       parent.appendChild(node);
@@ -328,11 +332,12 @@ export default class Elym {
   public classed(className: string, value: boolean): this;
   public classed(className: string, value?: boolean): this | boolean {
     if (value === undefined) {
+      const [firstNode] = this._nodes;
       return this.nodes.length
-        ? this.nodes[0].classList.contains(className)
+        ? firstNode.classList.contains(className)
         : false;
     }
-    this.nodes.forEach((node) => node.classList.toggle(className, value));
+    this._nodes.forEach((node) => node.classList.toggle(className, value));
     return this;
   }
 
@@ -344,7 +349,7 @@ export default class Elym {
   public each(
     callback: (node: HTMLElement | SVGElement, index: number) => void
   ): this {
-    this.nodes.forEach((node, index) =>
+    this._nodes.forEach((node, index) =>
       callback(node as HTMLElement | SVGElement, index)
     );
     return this;
@@ -365,15 +370,15 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public remove(): this {
-    this.nodes.forEach((node) => {
-      const eventMap = this.eventListeners.get(node);
+    this._nodes.forEach((node) => {
+      const eventMap = this._eventListeners.get(node);
       if (eventMap) {
         eventMap.forEach((callbacks, event) => {
           callbacks.forEach((callback) =>
             node.removeEventListener(event, callback)
           );
         });
-        this.eventListeners.delete(node);
+        this._eventListeners.delete(node);
       }
       node.remove();
     });
@@ -385,12 +390,12 @@ export default class Elym {
    * @returns {Elym} The cloned instance.
    */
   public clone(): Elym {
-    const clone = new Elym(this.root.outerHTML);
-    this.nodes.forEach((node, index) => {
-      const clonedNode = clone.nodes[index];
+    const clone = new Elym(this._root.outerHTML);
+    this._nodes.forEach((node, index) => {
+      const clonedNode = clone._nodes[index];
 
       // Clone event listeners
-      const eventMap = this.eventListeners.get(node);
+      const eventMap = this._eventListeners.get(node);
       if (eventMap) {
         const clonedEventMap = new Map<string, EventListener[]>();
         eventMap.forEach((callbacks, event) => {
@@ -399,7 +404,7 @@ export default class Elym {
           );
           clonedEventMap.set(event, [...callbacks]);
         });
-        clone.eventListeners.set(clonedNode, clonedEventMap);
+        clone._eventListeners.set(clonedNode, clonedEventMap);
       }
 
       // Clone data
@@ -419,7 +424,7 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public toggle(attributeOrClass: string, state: boolean): this {
-    this.nodes.forEach((node) => {
+    this._nodes.forEach((node) => {
       if (node instanceof HTMLElement) {
         if (node.hasAttribute(attributeOrClass)) {
           if (state) {
@@ -455,11 +460,11 @@ export default class Elym {
     properties: Partial<CSSStyleDeclaration>,
     easing: string = "ease"
   ): this {
-    this.nodes.forEach((node) => {
+    this._nodes.forEach((node) => {
       node.style.transition = `all ${duration}ms ${easing}`;
 
       Object.entries(properties).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
+        if (!value) {
           node.style.setProperty(key, String(value));
         }
       });
@@ -477,7 +482,7 @@ export default class Elym {
     dataset: T[],
     callback?: (node: HTMLElement | SVGElement, datum: T, index: number) => void
   ): this {
-    this.nodes.forEach((node, index) => {
+    this._nodes.forEach((node, index) => {
       if (index < dataset.length) {
         this.#data.set(node, dataset[index]);
         callback?.(node, dataset[index], index);
@@ -491,7 +496,7 @@ export default class Elym {
    * @returns {this} The current instance for chaining.
    */
   public backToRoot(): this {
-    this.#nodes = [this.root];
+    this.#nodes = [this._root];
     return this;
   }
 
@@ -499,16 +504,16 @@ export default class Elym {
    * Gets the root element.
    * @returns {HTMLElement | SVGSVGElement} The root element.
    */
-  public getRootNode() {
-    return this.root;
+  public root() {
+    return this._root;
   }
 
   /**
    * Gets the first selected element.
    * @returns {HTMLElement | SVGElement} The first selected element.
    */
-  public getNode() {
-    const [node] = this.nodes;
+  public node() {
+    const [node] = this._nodes;
     return node;
   }
 
@@ -516,8 +521,8 @@ export default class Elym {
    * Gets all selected elements.
    * @returns {Array<HTMLElement | SVGElement>} The selected elements.
    */
-  public getNodes() {
-    return [...this.nodes];
+  public nodes() {
+    return [...this._nodes];
   }
 
   /**
@@ -534,7 +539,7 @@ export default class Elym {
    * @protected
    * @returns {HTMLElement | SVGSVGElement} The root element.
    */
-  protected get root() {
+  protected get _root() {
     return this.#root;
   }
 
@@ -543,7 +548,7 @@ export default class Elym {
    * @protected
    * @returns {Array<HTMLElement | SVGElement>} The selected elements.
    */
-  protected get nodes() {
+  protected get _nodes() {
     return this.#nodes;
   }
 
@@ -552,7 +557,7 @@ export default class Elym {
    * @protected
    * @returns {WeakMap<HTMLElement | SVGElement, Map<string, EventListener[]>>} The event listeners map.
    */
-  protected get eventListeners() {
+  protected get _eventListeners() {
     return this.#eventListeners;
   }
 }
