@@ -27,7 +27,7 @@ export default class KanbanDropZone extends KanbanSubject {
   }
 
   #toggleDropZoneActive(isActive: boolean) {
-    this.dropZone.classed("kanban__dropzone--active", isActive);
+    this._dropZone.classed("kanban__dropzone--active", isActive);
   }
 
   #handleDrop(event: DragEvent) {
@@ -59,19 +59,19 @@ export default class KanbanDropZone extends KanbanSubject {
       : this.root;
 
     insertAfter.after(droppedKanbanTask);
-    this.api.updateTask(taskId, { columnId, position: droppedIndex });
+    this._api.updateTask(taskId, { columnId, position: droppedIndex });
     this.notifyObservers("taskMoved", { taskId, columnId, position: droppedIndex });
   }
 
   public get root() {
-    return this.#dropZone.getRootNode();
+    return this.#dropZone.root();
   }
 
-  protected get dropZone() {
+  protected get _dropZone() {
     return this.#dropZone;
   }
 
-  protected get api() {
+  protected get _api() {
     return this.#api;
   }
 }

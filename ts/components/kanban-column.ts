@@ -27,11 +27,11 @@ export default class KanbanColumn implements Observer {
   }
 
   public renderTask({ id, description }: Task) {
-    const kanbanTask = new KanbanTask(id, description, this.api);
+    const kanbanTask = new KanbanTask(id, description, this._api);
     kanbanTask.addObserver(this);
-    this.kanbanColumn
+    this._kanbanColumn
       .select(".kanban__column-tasks")
-      .appendChild(kanbanTask.root as HTMLElement);
+      .appendChild(kanbanTask.root() as HTMLElement);
   }
 
   public update(eventType: string, data: any) {
@@ -40,9 +40,9 @@ export default class KanbanColumn implements Observer {
 
   #initRootElement(title: string) {
     return new Elym(KanbanColumn.#COLUMN_HTML)
-      .attr("data-id", this.id.toString())
+      .attr("data-id", this._id.toString())
       .select(".kanban__column-tasks")
-      .appendChild(new KanbanDropZone(this.api).root as HTMLElement)
+      .appendChild(new KanbanDropZone(this._api).root as HTMLElement)
       .select(".kanban__column-title")
       .text(title)
       .select(".kanban__add-task")
@@ -50,11 +50,11 @@ export default class KanbanColumn implements Observer {
   }
 
   #initTasks() {
-    for (const task of this.api.getTasks(this.id)) this.renderTask(task);
+    for (const task of this._api.getTasks(this._id)) this.renderTask(task);
   }
 
   #handleAddTask = () => {
-    const newTask = this.api.insertTask(this.#id, "");
+    const newTask = this._api.insertTask(this._id, "");
 
     // Ensure newItem is valid before rendering
     if (
@@ -70,18 +70,18 @@ export default class KanbanColumn implements Observer {
   };
 
   public get root() {
-    return this.#kanbanColumn.getRootNode();
+    return this.#kanbanColumn.root();
   }
 
-  protected get api() {
+  protected get _api() {
     return this.#api;
   }
 
-  protected get id() {
+  protected get _id() {
     return this.#id;
   }
 
-  protected get kanbanColumn() {
+  protected get _kanbanColumn() {
     return this.#kanbanColumn;
   }
 }

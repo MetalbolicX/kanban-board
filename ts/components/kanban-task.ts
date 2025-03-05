@@ -36,39 +36,39 @@ export default class KanbanTask extends KanbanSubject {
 
   #initRootElement() {
     return new Elym(KanbanTask.#TASK_HTML)
-      .attr("data-id", this.id.toString())
+      .attr("data-id", this._id.toString())
       .on("dblclick", this.#handleDelete)
       .on("dragstart", (event) => this.#handleDragStart(event as DragEvent))
       .on("drop", (event) => this.#handleDrop(event as DragEvent))
-      .appendChild(new KanbanDropZone(this.api).root as HTMLElement)
+      .appendChild(new KanbanDropZone(this._api).root as HTMLElement)
       .select(".kanban__task-input")
-      .text(this.description)
+      .text(this._description)
       .on("blur", this.#handleBlur);
   }
 
   #handleBlur = () => {
     const newDescription =
-      this.kanbanTask.select(".kanban__task-input").text() || "";
-    if (newDescription === this.description) return;
+      this._kanbanTask.select(".kanban__task-input").text() || "";
+    if (newDescription === this._description) return;
 
     this.#description = newDescription;
-    this.api.updateTask(this.id, { description: this.description });
+    this._api.updateTask(this._id, { description: this._description });
   };
 
   #handleDelete = () => {
     if (!confirm("Are you sure you want to delete this item?")) return;
     this.notifyObservers("taskDeleted", {
-      taskId: this.id,
-      description: this.description,
+      taskId: this._id,
+      description: this._description,
     });
-    this.api.deleteTask(this.id);
-    this.kanbanTask.remove();
+    this._api.deleteTask(this._id);
+    this._kanbanTask.remove();
   };
 
   #handleDragStart(event: DragEvent) {
-    if (typeof this.id !== "number") return;
-    event.dataTransfer?.setData("text/plain", this.id.toString());
-    this.notifyObservers("taskDragStarted", this.id);
+    if (typeof this._id !== "number") return;
+    event.dataTransfer?.setData("text/plain", this._id.toString());
+    this.notifyObservers("taskDragStarted", this._id);
   }
 
   #handleDrop(event: DragEvent) {
@@ -76,22 +76,22 @@ export default class KanbanTask extends KanbanSubject {
   }
 
   public get root() {
-    return this.kanbanTask.getRootNode();
+    return this._kanbanTask.root;
   }
 
-  protected get id() {
+  protected get _id() {
     return this.#id;
   }
 
-  protected get description() {
+  protected get _description() {
     return this.#description;
   }
 
-  protected get api() {
+  protected get _api() {
     return this.#api;
   }
 
-  protected get kanbanTask() {
+  protected get _kanbanTask() {
     return this.#kanbanTask;
   }
 }
