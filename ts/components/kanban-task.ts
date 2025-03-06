@@ -15,22 +15,23 @@ export default class KanbanTask extends KanbanSubject {
       <div class="kanban__task-input" contenteditable="true"></div>
     </div>
   `;
-  #api: KanbanApi;
+  #kanbanApi: KanbanApi;
   #description: string;
   #id: number;
   #kanbanTask: Elym;
+  #kanbanDropZone: typeof KanbanDropZone;
 
-  /**
-   * Creates a new Kanban task element which will contain information and its interaction.
-   * @param {number} id - The ID of the task.
-   * @param {string} description - The description of the task.
-   * @param {KanbanApi} api - The API to interact with the storage.
-   */
-  constructor(id: number, description: string, api: KanbanApi) {
+  constructor(
+    id: number,
+    description: string,
+    kanbanApi: KanbanApi,
+    kanbanDropZone: typeof KanbanDropZone
+  ) {
     super();
     this.#id = id;
     this.#description = description;
-    this.#api = api;
+    this.#kanbanApi = kanbanApi;
+    this.#kanbanDropZone = kanbanDropZone;
     this.#kanbanTask = this.#initRootElement();
   }
 
@@ -40,7 +41,7 @@ export default class KanbanTask extends KanbanSubject {
       .on("dblclick", this.#handleDelete)
       .on("dragstart", (event) => this.#handleDragStart(event as DragEvent))
       .on("drop", (event) => this.#handleDrop(event as DragEvent))
-      .appendChild(new KanbanDropZone(this._api).root as HTMLElement)
+      .appendChild(new this._kanbanDropZone(this._kanbanApi).root as HTMLElement)
       .select(".kanban__task-input")
       .text(this._description)
       .on("blur", this.#handleBlur);
@@ -52,7 +53,7 @@ export default class KanbanTask extends KanbanSubject {
     if (newDescription === this._description) return;
 
     this.#description = newDescription;
-    this._api.updateTask(this._id, { description: this._description });
+    this._kanbanApi.updateTask(this._id, { description: this._description });
   };
 
   #handleDelete = () => {
@@ -61,7 +62,7 @@ export default class KanbanTask extends KanbanSubject {
       taskId: this._id,
       description: this._description,
     });
-    this._api.deleteTask(this._id);
+    this._kanbanApi.deleteTask(this._id);
     this._kanbanTask.remove();
   };
 
@@ -87,11 +88,15 @@ export default class KanbanTask extends KanbanSubject {
     return this.#description;
   }
 
-  protected get _api() {
-    return this.#api;
+  protected get _kanbanApi() {
+    return this.#kanbanApi;
   }
 
   protected get _kanbanTask() {
     return this.#kanbanTask;
+  }
+
+  protected get _kanbanDropZone() {
+    return this.#kanbanDropZone;
   }
 }

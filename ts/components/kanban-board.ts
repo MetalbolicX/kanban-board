@@ -1,4 +1,7 @@
 import KanbanColumn from "./kanban-column.ts";
+import KanbanTask from "./kanban-task.ts";
+import KanbanApi from "../API/kanban-api.ts";
+import KanbanDropZone from "./kanban-dropzone.ts";
 
 import type { Storage } from "../interfaces/kanban-interfaces.ts";
 
@@ -19,7 +22,13 @@ export default class KanbanBoard {
 
   #renderColumns(storage: Storage) {
     KanbanBoard.#columns.forEach(({ id, title }) => {
-      const kanbanColumn = new KanbanColumn(id, title, storage);
+      const kanbanColumn = new KanbanColumn(
+        id,
+        title,
+        new KanbanApi(storage),
+        KanbanTask,
+        KanbanDropZone
+      );
       this.container.appendChild(kanbanColumn.root);
     });
   }

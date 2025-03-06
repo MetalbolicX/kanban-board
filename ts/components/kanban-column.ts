@@ -1,11 +1,10 @@
 import KanbanTask from "./kanban-task.ts";
 import KanbanApi from "../API/kanban-api.ts";
-import { Elym } from "elym";
 import KanbanDropZone from "./kanban-dropzone.ts";
 import { Observer } from "../interfaces/kanban-interfaces.ts";
+import { Elym } from "elym";
 
 import type { Task } from "../types/kanban-types.ts";
-import type { Storage } from "../interfaces/kanban-interfaces.ts";
 
 export default class KanbanColumn implements Observer {
   static readonly #COLUMN_HTML = /*html*/ `
@@ -17,19 +16,34 @@ export default class KanbanColumn implements Observer {
   `;
   #kanbanColumn: Elym;
   #id: number;
-  #api: KanbanApi;
+  #kanbanApi: KanbanApi;
+  #kanbanTask: typeof KanbanTask;
+  #kanbanDropZone: typeof KanbanDropZone;
 
-  constructor(id: number, title: string, storage: Storage) {
+  constructor(
+    id: number,
+    title: string,
+    kanbanApi: KanbanApi,
+    kanbanTask: typeof KanbanTask,
+    kanbanDropZone: typeof KanbanDropZone
+  ) {
     this.#id = id;
-    this.#api = new KanbanApi(storage);
+    this.#kanbanApi = kanbanApi;
+    this.#kanbanTask = kanbanTask;
+    this.#kanbanDropZone = kanbanDropZone;
     this.#kanbanColumn = this.#initRootElement(title);
     this.#initTasks();
   }
 
   public renderTask({ id, description }: Task) {
-    const kanbanTask = new KanbanTask(id, description, this._api);
+    const kanbanTask = new this._kanbanTask(
+      id,
+      description,
+      this._kanbanApi,
+      this._kanbanDropZone
+    );
     kanbanTask.addObserver(this);
-    this._kanbanColumn
+    this.#kanbanColumn
       .select(".kanban__column-tasks")
       .appendChild(kanbanTask.root() as HTMLElement);
   }
@@ -40,9 +54,11 @@ export default class KanbanColumn implements Observer {
 
   #initRootElement(title: string) {
     return new Elym(KanbanColumn.#COLUMN_HTML)
-      .attr("data-id", this._id.toString())
+      .attr("data-id", this.#id.toString())
       .select(".kanban__column-tasks")
-      .appendChild(new KanbanDropZone(this._api).root as HTMLElement)
+      .appendChild(
+        new this._kanbanDropZone(this._kanbanApi).root as HTMLElement
+      )
       .select(".kanban__column-title")
       .text(title)
       .select(".kanban__add-task")
@@ -50,11 +66,12 @@ export default class KanbanColumn implements Observer {
   }
 
   #initTasks() {
-    for (const task of this._api.getTasks(this._id)) this.renderTask(task);
+    for (const task of this.#kanbanApi.getTasks(this.#id))
+      this.renderTask(task);
   }
 
   #handleAddTask = () => {
-    const newTask = this._api.insertTask(this._id, "");
+    const newTask = this.#kanbanApi.insertTask(this.#id, "");
 
     // Ensure newItem is valid before rendering
     if (
@@ -73,8 +90,8 @@ export default class KanbanColumn implements Observer {
     return this.#kanbanColumn.root();
   }
 
-  protected get _api() {
-    return this.#api;
+  protected get _kanbanApi() {
+    return this.#kanbanApi;
   }
 
   protected get _id() {
@@ -83,5 +100,13 @@ export default class KanbanColumn implements Observer {
 
   protected get _kanbanColumn() {
     return this.#kanbanColumn;
+  }
+
+  protected get _kanbanTask() {
+    return this.#kanbanTask;
+  }
+
+  protected get _kanbanDropZone() {
+    return this.#kanbanDropZone;
   }
 }
