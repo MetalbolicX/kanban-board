@@ -1,0 +1,152 @@
+:root {
+  --bg-color: #e2e8f0;
+  --text-color: #404040;
+  --primary-color: #475569;
+  --secondary-color: #cbd5e1;
+  --task-color: #f6f6f6;
+  --cancel-color: #e5e7eb;
+  --confirm-color: #dc2626;
+  --confirm-hover-color: #b91c1c;
+  --task-size: 3em;
+}
+
+* {
+  font-family: "Roboto", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+h2 {
+  margin: 2em 0;
+}
+
+li {
+  list-style: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  outline-color: var(--secondary-color);
+  color: var(--primary-color);
+  transition: 0.3s;
+  opacity: 0.5;
+
+  &:is(:active, :hover) {
+    opacity: 1;
+  }
+}
+
+.kanban {
+  width: min(1200px, 90%);
+  margin: 0 auto;
+  display: flex;
+  gap: 1.5em;
+}
+
+.kanban__column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.kanban__title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kanban__tasks {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  position: relative;
+
+  &.drag-task-over::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--secondary-color);
+    border: 2px dashed var(--primary-color);
+    opacity: 0.35;
+    pointer-events: none;
+  }
+}
+
+.kanban__task {
+  background-color: var(--task-color);
+  padding: 1em;
+  border-radius: 0.5em;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  align-items: center;
+  box-shadow: 0.2px 4px rgba(0, 0, 0, 0.1);
+  min-height: var(--task-size);
+  cursor: move;
+  transition: 0.3s;
+
+  &:focus {
+    cursor: move;
+  }
+
+  &.dragging {
+    cursor: grabbing;
+    box-shadow: none;
+    background: var(--secondary-color);
+    opacity: 0.5;
+
+    * {
+      visibility: hidden;
+    }
+  }
+
+  &:not(.dragging):hover {
+    background: var(--task-color);
+  }
+}
+
+.kanban__task-description {
+  flex: 1;
+  resize: none;
+  overflow: hidden;
+  height: var(--task-size);
+  border: 1px solid var(--secondary-color);
+  border-radius: 0.5em;
+  padding: 0.5em;
+  font-size: 0.95em;
+
+  &:focus {
+    overflow-y: scroll;
+  }
+}
+
+.kanban__task-actions {
+  display: flex;
+  gap: 0.5em;
+
+  button {
+    padding: 0.5em;
+    border-radius: 0.5em;
+    transition: 0.3s;
+
+    &:is(:active, :hover) {
+      background: var(--secondary-color);
+    }
+  }
+}

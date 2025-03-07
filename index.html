@@ -4,15 +4,54 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sticky notes</title>
-    <link rel="stylesheet" href="main.css" type="text/css" />
-    <script src="./ts/components/confirm-dialog.ts"></script>
+    <!-- <link rel="stylesheet" href="main.css" type="text/css" /> -->
+     <link rel="stylesheet" href="styles.css" type="text/css" />
   </head>
   <body>
-    <main class="kanban"></main>
-    <confirm-dialog id="confirm" icon="error">
-      <h3 slot="title">Are you sure you want to continue?</h3>
-      <p slot="description">This action cannot be undone.</p>
-    </confirm-dialog>
+    <main class="kanban">
+      <section class="kanban__column" id="todo">
+        <header class="kanban__title">
+          <h2>To Do</h2>
+          <button id="kanban__add-task" type="button">+ Add</button>
+        </header>
+        <menu class="kanban__tasks">
+          <!-- <li class="kanban__task" draggable="true">
+            <textarea class="kanban__task-description" placeholder="Write a task..."></textarea>
+            <div class="kanban__task-actions">
+              <button class="kanban__task-edit" type="button">✏</button>
+              <button class="kanban__task-delete" type="button">🗑</button>
+            </div>
+          </li> -->
+        </menu>
+      </section>
+      <section class="kanban__column" id="in-progress">
+        <header class="kanban__title">
+          <h2>In Progress</h2>
+        </header>
+        <menu class="kanban__tasks">
+          <!-- <li class="kanban__task" draggable="true">
+            <textarea class="kanban__task-description" placeholder="Write a task..."></textarea>
+            <div class="kanban__task-actions">
+              <button class="kanban__task-edit" type="button">✏</button>
+              <button class="kanban__task-delete" type="button">🗑</button>
+            </div>
+          </li> -->
+        </menu>
+      </section>
+      <section class="kanban__column" id="done">
+        <header class="kanban__title">
+          <h2>Done</h2>
+        </header>
+        <menu class="kanban__tasks">
+          <!-- <li class="kanban__task" draggable="true">
+            <textarea class="kanban__task-description" placeholder="Write a task..."></textarea>
+            <div class="kanban__task-actions">
+              <button class="kanban__task-edit" type="button">✏</button>
+              <button class="kanban__task-delete" type="button">🗑</button>
+            </div>
+          </li> -->
+      </section>
+    </main>
     <script type="module" src="./ts/main.ts"></script>
   </body>
 </html>

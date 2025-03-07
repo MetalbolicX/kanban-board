@@ -8,11 +8,11 @@ import type { Task } from "../types/kanban-types.ts";
 
 export default class KanbanColumn implements Observer {
   static readonly #COLUMN_HTML = /*html*/ `
-    <div class="kanban__column">
-      <h3 class="kanban__column-title"></h3>
-      <div class="kanban__column-tasks"></div>
+    <section class="kanban__column">
+      <header class="kanban__column-title"></header>
+      <article class="kanban__column-tasks"></article>
       <button class="kanban__add-task" type="button">+ Add</button>
-    </div>
+    </section>
   `;
   #kanbanColumn: Elym;
   #id: number;

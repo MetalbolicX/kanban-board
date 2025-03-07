@@ -11,9 +11,9 @@ import KanbanSubject from "../interfaces/kanban-subject.ts";
  */
 export default class KanbanTask extends KanbanSubject {
   static readonly #TASK_HTML = /*html*/ `
-    <div class="kanban__task" draggable="true">
+    <article class="kanban__task" draggable="true">
       <div class="kanban__task-input" contenteditable="true"></div>
-    </div>
+    </article>
   `;
   #kanbanApi: KanbanApi;
   #description: string;
