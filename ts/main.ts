@@ -1,19 +1,17 @@
 import { createColumn } from "./components/column.ts";
+import { Elym } from "elym";
+import { columnParams } from "./components/column.ts";
 
 const main = () => {
-  const kanbanBoard = document.querySelector(".kanban");
-  if (!kanbanBoard) return;
-
-  const kanbanColumns = [
+  // Inital data to create the kanban board columns
+  const kanbanColumns: columnParams[] = [
     { id: "todo", title: "To Do" },
     { id: "in-progress", title: "In Progress" },
     { id: "done", title: "Done" },
   ];
-
-  for (const kanbanColumn of kanbanColumns) {
-    const column = createColumn(kanbanColumn);
-    kanbanBoard.appendChild(column.root());
-  }
+  // Append the columns to the kanban board
+  const kanbanBoard = Elym.select("#kanban-board");
+  kanbanBoard.appendElements(...kanbanColumns.map(createColumn));
 };
 
 main();

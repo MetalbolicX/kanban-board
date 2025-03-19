@@ -1,6 +1,11 @@
 import { Elym } from "elym";
 import { createTask } from "./task.ts";
 
+export type columnParams = {
+  id: string;
+  title: string;
+};
+
 /**
  * Handles the drag over event.
  * @param {DragEvent} event - The drag event.
@@ -85,13 +90,11 @@ const handleAddTask = () => {
 };
 
 /**
- * Creates a new Kanban column.
- * @param {Object} param - The column parameters.
- * @param {string} param.id - The column ID.
- * @param {string} param.title - The column title.
- * @returns {Elym} - The created column element.
+ * Creates a new column element with the given title.
+ * @param {columnParams} param - The column parameters.
+ * @returns {Elym} The created column element.
  */
-const createColumn = ({ id, title }: { id: string; title: string }) =>
+const createColumn = ({ id, title }: columnParams) =>
   new Elym(/*html*/ `
     <section class="kanban__column" id="${id}">
       <header class="kanban__title">
@@ -105,9 +108,9 @@ const createColumn = ({ id, title }: { id: string; title: string }) =>
       <menu class="kanban__tasks"></menu>
     </section>
   `)
-    .select(".kanban__add-task")
+    .selectChild(".kanban__add-task")
     .on("click", handleAddTask)
-    .select(".kanban__tasks")
+    .selectChild(".kanban__tasks")
     .on("dragover", (event) => handleDragOver(event as DragEvent))
     .on("dragleave", (event) => handleDragLeave(event as DragEvent))
     .on("drop", (event) => handleDrop(event as DragEvent))

@@ -68,9 +68,9 @@ const createTask = (description: string = "") =>
   `)
     .on("dragstart", (event) => handleDragStart(event as DragEvent))
     .on("dragend", handleDragEnd)
-    .select(".kanban__task-description")
+    .selectChild(".kanban__task-description")
     .on("blur", handleBlurEdit)
-    .select(".kanban__task-delete")
+    .selectChild(".kanban__task-delete")
     .on("click", handleDeleteTask)
     .backToRoot();
 
