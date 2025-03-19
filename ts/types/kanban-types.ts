@@ -1,12 +1,12 @@
-export type Task = {
-  id: number;
-  description: string;
+export type task = {
+  id: string;
+  description?: string;
 };
 
-export type Column = {
-  id: number;
-  tasks: Task[];
+export type column = {
+  id: string;
+  title: string;
 };
 
-export type Kanban = Column[];
+export type kanban = column[];
 

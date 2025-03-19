@@ -1,20 +1,50 @@
-import type { Storage, Kanban } from "../types/kanban-types.ts";
+import { Storage } from "../interfaces/storage-interfaces.ts";
+import type { column, task } from "../types/kanban-types.ts";
 
-export default class LocalStorage implements Storage {
-  readonly #storageKey = "kanban-data";
+export class LocalStorage implements Storage {
+  #columns: Map<string, task[]> = new Map();
 
-  public loadKanban(): Kanban {
-    const storedKanban = localStorage.getItem(this.#storageKey);
-    return storedKanban
-      ? JSON.parse(storedKanban)
-      : [
-          { id: 1, tasks: [] },
-          { id: 2, tasks: [] },
-          { id: 3, tasks: [] },
-        ];
+  init(columns: column[]) {
+    const savedState = localStorage.getItem('kanbanState');
+    if (savedState) {
+      this.#columns = new Map(JSON.parse(savedState));
+    } else {
+      columns.forEach(({ id }) => {
+        this.#columns.set(id, []);
+      });
+    }
   }
 
-  public saveKanban(kanban: Kanban) {
-    localStorage.setItem(this.#storageKey, JSON.stringify(kanban));
+  addTask(columnId: string, task: task) {
+    const tasks = this.#columns.get(columnId);
+    if (tasks) {
+      this.#columns.set(columnId, [...tasks, task]);
+      this.saveState();
+    }
+  }
+
+  removeTask(columnId: string, task: task) {
+    const tasks = this.#columns.get(columnId);
+    if (tasks) {
+      const taskIndex = tasks.indexOf(task);
+      if (taskIndex > -1) {
+        tasks.splice(taskIndex, 1);
+        this.saveState();
+      }
+    }
+  }
+
+  moveTask(sourceColumnId: string, targetColumnId: string, task: task) {
+    this.removeTask(sourceColumnId, task);
+    this.addTask(targetColumnId, task);
+  }
+
+  getTasks(columnId: string): task[] {
+    return this.#columns.get(columnId) || [];
+  }
+
+  private saveState() {
+    const stateToSave = JSON.stringify(Array.from(this.#columns.entries()));
+    localStorage.setItem('kanbanState', stateToSave);
   }
 }

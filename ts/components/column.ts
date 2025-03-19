@@ -1,10 +1,7 @@
 import { Elym } from "elym";
 import { createTask } from "./task.ts";
-
-export type columnParams = {
-  id: string;
-  title: string;
-};
+import { state } from "../main.ts"; // Import the state instance
+import type { column } from "../types/kanban-types.ts";
 
 /**
  * Handles the drag over event.
@@ -55,6 +52,17 @@ const handleDrop = (event: DragEvent) => {
   const task = document.querySelector(`.kanban__task.dragging`);
   if (!task) return;
 
+  const sourceColumnId = task.closest(".kanban__column")?.id;
+  const targetColumnId = dropZone.closest(".kanban__column")?.id;
+
+  if (sourceColumnId && targetColumnId && sourceColumnId !== targetColumnId) {
+    state.moveTask(sourceColumnId, targetColumnId, {
+      id: task.id,
+      description:
+        task.querySelector(".kanban__task-description")?.textContent || "",
+    });
+  }
+
   const afterElement = getDragAfterElement(
     dropZone as HTMLElement,
     event.clientY
@@ -83,18 +91,15 @@ const handleDragLeave = (event: DragEvent) => {
 /**
  * Handles the add task button click event.
  */
-const handleAddTask = () => {
-  const task = createTask(),
-    taskList = document.querySelector("#todo .kanban__tasks");
-  taskList?.appendChild(task.root());
+const handleAddTask = (columnId: string) => {
+  const task = { id: Date.now().toString() },
+    taskElement = createTask(task);
+  state.addTask(columnId, task);
+  const taskList = document.querySelector(`#${columnId} .kanban__tasks`);
+  taskList?.appendChild(taskElement.root());
 };
 
-/**
- * Creates a new column element with the given title.
- * @param {columnParams} param - The column parameters.
- * @returns {Elym} The created column element.
- */
-const createColumn = ({ id, title }: columnParams) =>
+const createColumn = ({ id, title }: column) =>
   new Elym(/*html*/ `
     <section class="kanban__column" id="${id}">
       <header class="kanban__title">
@@ -109,11 +114,12 @@ const createColumn = ({ id, title }: columnParams) =>
     </section>
   `)
     .selectChild(".kanban__add-task")
-    .on("click", handleAddTask)
+    .on("click", () => handleAddTask(id))
     .selectChild(".kanban__tasks")
     .on("dragover", (event) => handleDragOver(event as DragEvent))
     .on("dragleave", (event) => handleDragLeave(event as DragEvent))
     .on("drop", (event) => handleDrop(event as DragEvent))
+    .appendElements(...state.getTasks(id).map((task) => createTask(task)))
     .backToRoot();
 
 export { createColumn };

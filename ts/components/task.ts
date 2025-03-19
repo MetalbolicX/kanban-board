@@ -1,4 +1,6 @@
 import { Elym } from "elym";
+import { state } from "../main.ts";
+import type { task} from "../types/kanban-types.ts"
 
 /**
  * Handles the blur event on the task description textarea.
@@ -12,7 +14,7 @@ const handleBlurEdit = ({ target }: Event) => {
 
 /**
  * Handles the click event on the delete task button.
- * Removes the task element from the DOM.
+ * Removes the task element from the DOM and updates the state.
  * @param {Event} event - The click event.
  */
 const handleDeleteTask = ({ target }: Event) => {
@@ -20,6 +22,13 @@ const handleDeleteTask = ({ target }: Event) => {
   const taskElement = taskButton.closest(".kanban__task") as HTMLElement;
 
   if (!taskElement) return;
+
+  const columnId = taskElement.closest(".kanban__column")?.id;
+  if (columnId) {
+    state.removeTask(columnId, {
+      id: taskElement.id,
+    });
+  }
 
   if (Elym.isInstance(taskElement)) {
     const elymInstance = Elym.getInstance(taskElement);
@@ -53,13 +62,15 @@ const handleDragEnd = ({ target }: Event) => {
 };
 
 /**
- * Creates a new task element with the given description.
- * @param {string} [description=""] - The description of the task.
- * @returns {Elym} The created task element.
+ * Creates a task element.
+ * @param {taskType} param - The task object.
+ * @param {string} param.id - The task id.
+ * @param {string} [param.description=""] - The task description.
+ * @returns {Elym} The task element.
  */
-const createTask = (description: string = "") =>
+const createTask = ({ id, description = "" }: task) =>
   new Elym(/*html*/ `
-    <li class="kanban__task" draggable="true" data-id="${Date.now()}">
+    <li class="kanban__task" draggable="true" data-id="${id}">
       <textarea placeholder="Write a task..." class="kanban__task-description" autocorrect="true" spellcheck="true">${description}</textarea>
       <div class="kanban__task-actions">
         <button class="kanban__task-delete" type="button">🗑</button>

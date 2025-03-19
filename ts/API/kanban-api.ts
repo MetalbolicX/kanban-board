@@ -1,6 +1,6 @@
 import KanbanStorage from "../storage/kanban-storage.ts";
 import type { Task } from "../types/kanban-types.ts";
-import type { Storage } from "../interfaces/kanban-interfaces.ts";
+import type { Storage } from "../interfaces/storage-interfaces.ts";
 
 export default class KanbanApi {
   #storage: KanbanStorage;
