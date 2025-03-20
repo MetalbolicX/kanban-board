@@ -7,7 +7,7 @@ import type { column } from "../types/kanban-types.ts";
  * Handles the drag over event.
  * @param {DragEvent} event - The drag event.
  */
-const handleDragOver = (event: DragEvent) => {
+const handleDragOver = (event: DragEvent): void => {
   event.preventDefault();
   const dropZone = (event.target as HTMLElement).closest(".kanban__tasks");
   if (!dropZone) return;
@@ -20,46 +20,38 @@ const handleDragOver = (event: DragEvent) => {
  * @param {number} y - The y-coordinate of the mouse pointer.
  * @returns {HTMLElement | null} - The element after which the dragged element should be placed.
  */
-const getDragAfterElement = (container: HTMLElement, y: number) => {
-  const draggableElements = [
-    ...container.querySelectorAll(".kanban__task:not(.dragging)"),
-  ];
-
-  return draggableElements.reduce<{
-    element: HTMLElement | null;
-    offset: number;
-  }>(
-    (closest, child) => {
-      const box = child.getBoundingClientRect();
-      const offset = y - box.top - box.height / 2;
-      return offset < 0 && offset > closest.offset
-        ? { offset, element: child as HTMLElement }
-        : closest;
-    },
-    { offset: Number.NEGATIVE_INFINITY, element: null }
-  ).element;
-};
+const getDragAfterElement = (container: HTMLElement, y: number): HTMLElement | null=>
+  Elym.fromElement(container)
+    .selectChildren(".kanban__task:not(.dragging)")
+    .nodes()
+    .reduce<{ element: HTMLElement | null; offset: number }>(
+      (closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        return offset < 0 && offset > closest.offset
+          ? { offset, element: child as HTMLElement }
+          : closest;
+      },
+      { offset: Number.NEGATIVE_INFINITY, element: null }
+    ).element;
 
 /**
  * Handles the drop event.
  * @param {DragEvent} event - The drag event.
  */
-const handleDrop = (event: DragEvent) => {
+const handleDrop = (event: DragEvent): void => {
   event.preventDefault();
   const dropZone = (event.target as HTMLElement).closest(".kanban__tasks");
   if (!dropZone) return;
 
-  const task = document.querySelector(`.kanban__task.dragging`);
-  if (!task) return;
-
-  const sourceColumnId = task.closest(".kanban__column")?.id;
-  const targetColumnId = dropZone.closest(".kanban__column")?.id;
+  const task = Elym.select(".kanban__task.dragging"),
+    sourceColumnId = task.node()?.closest(".kanban__column")?.id,
+    targetColumnId = dropZone.closest(".kanban__tasks")?.id;
 
   if (sourceColumnId && targetColumnId && sourceColumnId !== targetColumnId) {
     state.moveTask(sourceColumnId, targetColumnId, {
-      id: task.id,
-      description:
-        task.querySelector(".kanban__task-description")?.textContent || "",
+      id: task.node()?.id,
+      description: task.selectChild(".kanban__task-description").text() || "",
     });
   }
 
@@ -68,9 +60,9 @@ const handleDrop = (event: DragEvent) => {
     event.clientY
   );
   if (!afterElement) {
-    dropZone.appendChild(task);
+    dropZone.appendChild(task.node());
   } else {
-    dropZone.insertBefore(task, afterElement);
+    dropZone.insertBefore(task.node(), afterElement);
   }
 };
 
@@ -78,7 +70,7 @@ const handleDrop = (event: DragEvent) => {
  * Handles the drag leave event.
  * @param {DragEvent} event - The drag event.
  */
-const handleDragLeave = (event: DragEvent) => {
+const handleDragLeave = (event: DragEvent): void => {
   const dropZone = event.target as HTMLElement;
 
   if (
@@ -90,16 +82,20 @@ const handleDragLeave = (event: DragEvent) => {
 
 /**
  * Handles the add task button click event.
+ * @param {string} columnId - The ID of the column where the task will be added.
  */
-const handleAddTask = (columnId: string) => {
-  const task = { id: Date.now().toString() },
-    taskElement = createTask(task);
+const handleAddTask = (columnId: string): void => {
+  const task = { id: Date.now().toString() };
   state.addTask(columnId, task);
-  const taskList = document.querySelector(`#${columnId} .kanban__tasks`);
-  taskList?.appendChild(taskElement.root());
+  Elym.select(`#${columnId} .kanban__tasks`).appendElements(createTask(task));
 };
 
-const createColumn = ({ id, title }: column) =>
+/**
+ * Creates a new column element.
+ * @param {column} param - The column data.
+ * @returns {Elym} - The created column element.
+ */
+const createColumn = ({ id, title }: column): Elym =>
   new Elym(/*html*/ `
     <section class="kanban__column" id="${id}">
       <header class="kanban__title">

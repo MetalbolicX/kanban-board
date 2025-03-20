@@ -1,13 +1,13 @@
 import { Elym } from "elym";
 import { state } from "../main.ts";
-import type { task} from "../types/kanban-types.ts"
+import type { task } from "../types/kanban-types.ts";
 
 /**
  * Handles the blur event on the task description textarea.
  * Logs the edited task description.
  * @param {Event} event - The blur event.
  */
-const handleBlurEdit = ({ target }: Event) => {
+const handleBlurEdit = ({ target }: Event): void => {
   const textArea = target as HTMLTextAreaElement;
   console.log("Edit task", textArea.value);
 };
@@ -17,7 +17,7 @@ const handleBlurEdit = ({ target }: Event) => {
  * Removes the task element from the DOM and updates the state.
  * @param {Event} event - The click event.
  */
-const handleDeleteTask = ({ target }: Event) => {
+const handleDeleteTask = ({ target }: Event): void => {
   const taskButton = target as HTMLElement;
   const taskElement = taskButton.closest(".kanban__task") as HTMLElement;
 
@@ -43,7 +43,7 @@ const handleDeleteTask = ({ target }: Event) => {
  * Adds the dragging class to the task element.
  * @param {DragEvent} event - The dragstart event.
  */
-const handleDragStart = (event: DragEvent) => {
+const handleDragStart = (event: DragEvent): void => {
   const task = event.target as HTMLElement;
   task.classList.add("dragging");
 };
@@ -53,22 +53,23 @@ const handleDragStart = (event: DragEvent) => {
  * Removes the dragging class from the task element and clears drag-over classes from drop zones.
  * @param {Event} event - The dragend event.
  */
-const handleDragEnd = ({ target }: Event) => {
+const handleDragEnd = ({ target }: Event): void => {
   const task = target as HTMLElement;
   task.classList.remove("dragging");
 
-  const dropZones = [...document.querySelectorAll(".kanban__tasks")];
-  for (const dropZone of dropZones) dropZone.classList.remove("drag-task-over");
+  Elym.selectAll(".kanban__tasks").each((dropZone) =>
+    dropZone.classList.remove("drag-task-over")
+  );
 };
 
 /**
  * Creates a task element.
- * @param {taskType} param - The task object.
+ * @param {Object} param - The task object.
  * @param {string} param.id - The task id.
  * @param {string} [param.description=""] - The task description.
  * @returns {Elym} The task element.
  */
-const createTask = ({ id, description = "" }: task) =>
+const createTask = ({ id, description = "" }: task): Elym =>
   new Elym(/*html*/ `
     <li class="kanban__task" draggable="true" data-id="${id}">
       <textarea placeholder="Write a task..." class="kanban__task-description" autocorrect="true" spellcheck="true">${description}</textarea>

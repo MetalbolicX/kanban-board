@@ -18,8 +18,9 @@ const main = () => {
   state.init(kanbanColumns);
 
   // Append the columns to the kanban board
-  const kanbanBoard = Elym.select("#kanban-board");
-  kanbanBoard.appendElements(...kanbanColumns.map(createColumn));
+  Elym.select("#kanban-board").appendElements(
+    ...kanbanColumns.map(createColumn)
+  );
 };
 
 main();
