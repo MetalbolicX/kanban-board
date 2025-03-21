@@ -6,7 +6,6 @@ export type task = {
 export type column = {
   id: string;
   title: string;
+  tasks: task[];
 };
-
-export type kanban = column[];
 

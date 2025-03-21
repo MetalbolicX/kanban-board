@@ -17,24 +17,17 @@ const handleBlurEdit = ({ target }: Event): void => {
  * Removes the task element from the DOM and updates the state.
  * @param {Event} event - The click event.
  */
-const handleDeleteTask = ({ target }: Event): void => {
-  const taskButton = target as HTMLElement;
-  const taskElement = taskButton.closest(".kanban__task") as HTMLElement;
+const handleRemoveTask = ({ target }: Event): void => {
+  const removeButton = target as HTMLElement,
+    task = removeButton.closest(".kanban__task") as HTMLElement;
 
-  if (!taskElement) return;
+  if (!task) return;
 
-  const columnId = taskElement.closest(".kanban__column")?.id;
+  const columnId = task.closest(".kanban__column")?.id;
   if (columnId) {
     state.removeTask(columnId, {
-      id: taskElement.id,
+      id: task.dataset.id ?? "",
     });
-  }
-
-  if (Elym.isInstance(taskElement)) {
-    const elymInstance = Elym.getInstance(taskElement);
-    elymInstance?.remove();
-  } else {
-    taskElement.remove();
   }
 };
 
@@ -83,7 +76,7 @@ const createTask = ({ id, description = "" }: task): Elym =>
     .selectChild(".kanban__task-description")
     .on("blur", handleBlurEdit)
     .selectChild(".kanban__task-delete")
-    .on("click", handleDeleteTask)
+    .on("click", handleRemoveTask)
     .backToRoot();
 
 export { createTask };

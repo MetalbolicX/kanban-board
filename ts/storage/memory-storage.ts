@@ -12,7 +12,7 @@ export class MemoryStorage implements Storage {
    * Initializes the storage with the given columns.
    * @param {column[]} columns - The columns to initialize.
    */
-  init(columns: column[]) {
+  init(columns: column[]): void {
     columns.forEach(({ id }) => {
       this._columns.set(id, []);
     });
@@ -23,7 +23,7 @@ export class MemoryStorage implements Storage {
    * @param {string} columnId - The ID of the column.
    * @param {task} task - The task to add.
    */
-  addTask(columnId: string, task: task) {
+  addTask(columnId: string, task: task): void {
     const tasks = this._columns.get(columnId);
     if (tasks) {
       this._columns.set(columnId, [...tasks, task]);
@@ -35,7 +35,7 @@ export class MemoryStorage implements Storage {
    * @param {string} columnId - The ID of the column.
    * @param {task} task - The task to remove.
    */
-  removeTask(columnId: string, task: task) {
+  removeTask(columnId: string, task: task): void {
     const tasks = this._columns.get(columnId);
     if (tasks) {
       const taskIndex = tasks.indexOf(task);
@@ -51,7 +51,7 @@ export class MemoryStorage implements Storage {
    * @param {string} targetColumnId - The ID of the target column.
    * @param {task} task - The task to move.
    */
-  moveTask(sourceColumnId: string, targetColumnId: string, task: task) {
+  moveTask(sourceColumnId: string, targetColumnId: string, task: task): void {
     this.removeTask(sourceColumnId, task);
     this.addTask(targetColumnId, task);
   }

@@ -1,11 +1,15 @@
-import { Storage } from '../interfaces/storage-interfaces.ts';
-import type { column, task } from '../types/kanban-types.ts';
+import { Storage } from "../interfaces/storage-interfaces.ts";
+import ReactiveState from "./reactive-state.ts";
+
+import type { column, task } from "../types/kanban-types.ts";
+import type { Listener } from "../types/state-types.ts";
 
 /**
  * Class representing the state of the Kanban board.
  */
 export class State {
   #storage: Storage;
+  #reactiveState: ReactiveState;
 
   /**
    * Create a new State instance.
@@ -13,14 +17,17 @@ export class State {
    */
   constructor(storage: Storage) {
     this.#storage = storage;
+    this.#reactiveState = new ReactiveState({ columns: [] });
   }
 
   /**
    * Initialize the state with columns.
    * @param {column[]} columns - The columns to initialize.
    */
-  init(columns: column[]) {
+  public init(columns: column[]): void {
+    this.#reactiveState.state.columns = columns;
     this._storage.init(columns);
+    this._reactiveState.notify({ type: "init", payload: columns });
   }
 
   /**
@@ -28,7 +35,16 @@ export class State {
    * @param {string} columnId - The ID of the column.
    * @param {task} task - The task to add.
    */
-  addTask(columnId: string, task: task) {
+  public addTask(columnId: string, task: task): void {
+    const columns = this._reactiveState.state.columns,
+      column = columns.find((col: column) => col.id === columnId);
+    if (column) {
+      column.tasks = [...column.tasks, task];
+      this._reactiveState.notify({
+        type: "addTask",
+        payload: { columnId, task },
+      });
+    }
     this._storage.addTask(columnId, task);
   }
 
@@ -37,7 +53,16 @@ export class State {
    * @param {string} columnId - The ID of the column.
    * @param {task} task - The task to remove.
    */
-  removeTask(columnId: string, task: task) {
+  public removeTask(columnId: string, task: task): void {
+    const columns = this._reactiveState.state.columns,
+      column = columns.find((col: column) => col.id === columnId);
+    if (column) {
+      column.tasks = column.tasks.filter((t: task) => t.id !== task.id);
+      this._reactiveState.notify({
+        type: "removeTask",
+        payload: { columnId, task },
+      });
+    }
     this._storage.removeTask(columnId, task);
   }
 
@@ -47,8 +72,14 @@ export class State {
    * @param {string} targetColumnId - The ID of the target column.
    * @param {task} task - The task to move.
    */
-  moveTask(sourceColumnId: string, targetColumnId: string, task: task) {
+  public moveTask(sourceColumnId: string, targetColumnId: string, task: task): void {
+    this.removeTask(sourceColumnId, task);
+    this.addTask(targetColumnId, task);
     this._storage.moveTask(sourceColumnId, targetColumnId, task);
+    this._reactiveState.notify({
+      type: "moveTask",
+      payload: { sourceColumnId, targetColumnId, task },
+    });
   }
 
   /**
@@ -56,8 +87,24 @@ export class State {
    * @param {string} columnId - The ID of the column.
    * @returns {task[]} The tasks in the column.
    */
-  getTasks(columnId: string): task[] {
-    return this._storage.getTasks(columnId);
+  public getTasks(columnId: string): task[] {
+    // const column = this._reactiveState.state.columns.find(
+    //   (col: column) => col.id === columnId
+    // );
+    // return column ? column.tasks : [];
+    return (
+      this._reactiveState.state.columns.find(
+        (col: column) => col.id === columnId
+      )?.tasks || []
+    );
+  }
+
+  /**
+   * Subscribe to state changes.
+   * @param {Listener} listener - The listener to call on state changes.
+   */
+  public subscribe(listener: Listener): void {
+    this._reactiveState.subscribe(listener);
   }
 
   /**
@@ -67,5 +114,14 @@ export class State {
    */
   protected get _storage(): Storage {
     return this.#storage;
+  }
+
+  /**
+   * Get the reactive state instance.
+   * @protected
+   * @returns {ReactiveState} The reactive state instance.
+   */
+  protected get _reactiveState(): ReactiveState {
+    return this.#reactiveState;
   }
 }

@@ -20,7 +20,10 @@ const handleDragOver = (event: DragEvent): void => {
  * @param {number} y - The y-coordinate of the mouse pointer.
  * @returns {HTMLElement | null} - The element after which the dragged element should be placed.
  */
-const getDragAfterElement = (container: HTMLElement, y: number): HTMLElement | null=>
+const getDragAfterElement = (
+  container: HTMLElement,
+  y: number
+): HTMLElement | null =>
   Elym.fromElement(container)
     .selectChildren(".kanban__task:not(.dragging)")
     .nodes()
@@ -50,8 +53,13 @@ const handleDrop = (event: DragEvent): void => {
 
   if (sourceColumnId && targetColumnId && sourceColumnId !== targetColumnId) {
     state.moveTask(sourceColumnId, targetColumnId, {
-      id: task.node()?.id,
-      description: task.selectChild(".kanban__task-description").text() || "",
+      id: task.node()?.dataset.id ?? "",
+      description:
+        (
+          task
+            .selectChild(".kanban__task-description")
+            .node() as HTMLTextAreaElement
+        ).value || "",
     });
   }
 
@@ -87,7 +95,6 @@ const handleDragLeave = (event: DragEvent): void => {
 const handleAddTask = (columnId: string): void => {
   const task = { id: Date.now().toString() };
   state.addTask(columnId, task);
-  Elym.select(`#${columnId} .kanban__tasks`).appendElements(createTask(task));
 };
 
 /**
