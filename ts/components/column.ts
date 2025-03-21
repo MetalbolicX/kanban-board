@@ -49,9 +49,17 @@ const handleDrop = (event: DragEvent): void => {
 
   const task = Elym.select(".kanban__task.dragging"),
     sourceColumnId = task.node()?.closest(".kanban__column")?.id,
-    targetColumnId = dropZone.closest(".kanban__tasks")?.id;
+    targetColumnId = dropZone.closest(".kanban__column")?.id;
 
-  if (sourceColumnId && targetColumnId && sourceColumnId !== targetColumnId) {
+  if (sourceColumnId && targetColumnId) {
+    const afterElement = getDragAfterElement(
+      dropZone as HTMLMenuElement,
+      event.clientY
+    )
+    const targetIndex = afterElement
+      ? Array.from(dropZone.children).indexOf(afterElement)
+      : dropZone.children.length;
+
     state.moveTask(sourceColumnId, targetColumnId, {
       id: task.node()?.dataset.id ?? "",
       description:
@@ -60,17 +68,7 @@ const handleDrop = (event: DragEvent): void => {
             .selectChild(".kanban__task-description")
             .node() as HTMLTextAreaElement
         ).value || "",
-    });
-  }
-
-  const afterElement = getDragAfterElement(
-    dropZone as HTMLElement,
-    event.clientY
-  );
-  if (!afterElement) {
-    dropZone.appendChild(task.node());
-  } else {
-    dropZone.insertBefore(task.node(), afterElement);
+    }, targetIndex);
   }
 };
 

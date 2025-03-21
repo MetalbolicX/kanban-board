@@ -37,17 +37,17 @@ const main = () => {
         ).remove();
         break;
       case "moveTask":
-        const {
-          sourceColumnId,
-          targetColumnId,
-          task: movedTask,
-        } = change.payload;
-        // Elym.select(
-        //   `#${sourceColumnId} .kanban__task[data-id="${movedTask.id}"]`
-        // ).remove();
-        // Elym.select(`#${targetColumnId} .kanban__tasks`).appendElements(
-        //   createTask(movedTask)
-        // );
+        const { targetColumnId, task: movedTask, targetIndex } = change.payload,
+          targetColumn = Elym.select(`#${targetColumnId} .kanban__tasks`),
+          taskElement = createTask(movedTask),
+          afterElement = targetColumn.node().children[targetIndex];
+        if (afterElement) {
+          targetColumn
+            .node()
+            .insertBefore(taskElement.root() as HTMLElement, afterElement);
+        } else {
+          targetColumn.appendElements(taskElement);
+        }
         break;
       default:
         console.error("Invalid change");

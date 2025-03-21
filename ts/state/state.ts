@@ -71,15 +71,20 @@ export class State {
    * @param {string} sourceColumnId - The ID of the source column.
    * @param {string} targetColumnId - The ID of the target column.
    * @param {task} task - The task to move.
+   * @param {number} targetIndex - The index to move the task to.
    */
-  public moveTask(sourceColumnId: string, targetColumnId: string, task: task): void {
+  public moveTask(sourceColumnId: string, targetColumnId: string, task: task, targetIndex: number): void {
     this.removeTask(sourceColumnId, task);
-    this.addTask(targetColumnId, task);
-    this._storage.moveTask(sourceColumnId, targetColumnId, task);
-    this._reactiveState.notify({
-      type: "moveTask",
-      payload: { sourceColumnId, targetColumnId, task },
-    });
+    const columns = this._reactiveState.state.columns,
+    targetColumn = columns.find((col: column) => col.id === targetColumnId);
+    if (targetColumn) {
+      targetColumn.tasks.splice(targetIndex, 0, task);
+      this._reactiveState.notify({
+        type: "moveTask",
+        payload: { sourceColumnId, targetColumnId, task, targetIndex },
+      });
+      this._storage.moveTask(sourceColumnId, targetColumnId, task);
+    }
   }
 
   /**
@@ -88,10 +93,6 @@ export class State {
    * @returns {task[]} The tasks in the column.
    */
   public getTasks(columnId: string): task[] {
-    // const column = this._reactiveState.state.columns.find(
-    //   (col: column) => col.id === columnId
-    // );
-    // return column ? column.tasks : [];
     return (
       this._reactiveState.state.columns.find(
         (col: column) => col.id === columnId
