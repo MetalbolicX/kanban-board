@@ -51,7 +51,7 @@ const handleDragEnd = ({ target }: Event): void => {
   task.classList.remove("dragging");
 
   Elym.selectAll(".kanban__tasks").each((dropZone) =>
-    dropZone.classList.remove("drag-task-over")
+    dropZone.classList.remove("dropzone-active")
   );
 };
 
