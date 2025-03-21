@@ -75,20 +75,6 @@ const handleDrop = (event: DragEvent): void => {
 };
 
 /**
- * Handles the drag leave event.
- * @param {DragEvent} event - The drag event.
- */
-const handleDragLeave = (event: DragEvent): void => {
-  const dropZone = event.target as HTMLElement;
-
-  if (
-    dropZone.matches(".kanban__tasks") &&
-    !dropZone.contains(event.relatedTarget as Node)
-  )
-    dropZone.classList.remove("dropzone-active");
-};
-
-/**
  * Handles the add task button click event.
  * @param {string} columnId - The ID of the column where the task will be added.
  */
@@ -120,7 +106,6 @@ const createColumn = ({ id, title }: column): Elym =>
     .on("click", () => handleAddTask(id))
     .selectChild(".kanban__tasks")
     .on("dragover", (event) => handleDragOver(event as DragEvent))
-    .on("dragleave", (event) => handleDragLeave(event as DragEvent))
     .on("drop", (event) => handleDrop(event as DragEvent))
     .appendElements(...state.getTasks(id).map((task) => createTask(task)))
     .backToRoot();
