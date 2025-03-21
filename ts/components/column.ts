@@ -11,7 +11,7 @@ const handleDragOver = (event: DragEvent): void => {
   event.preventDefault();
   const dropZone = (event.target as HTMLElement).closest(".kanban__tasks");
   if (!dropZone) return;
-  dropZone.classList.add("drag-task-over");
+  dropZone.classList.add("dropzone-active");
 };
 
 /**
@@ -85,7 +85,7 @@ const handleDragLeave = (event: DragEvent): void => {
     dropZone.matches(".kanban__tasks") &&
     !dropZone.contains(event.relatedTarget as Node)
   )
-    dropZone.classList.remove("drag-task-over");
+    dropZone.classList.remove("dropzone-active");
 };
 
 /**

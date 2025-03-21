@@ -74,7 +74,7 @@ button {
   gap: 0.5em;
   position: relative;
 
-  &.drag-task-over::before {
+  &.dropzone-active::before {
     content: "";
     position: absolute;
     top: 0;
