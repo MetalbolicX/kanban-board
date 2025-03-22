@@ -8,8 +8,14 @@ import type { task } from "../types/kanban-types.ts";
  * @param {Event} event - The blur event.
  */
 const handleBlurEdit = ({ target }: Event): void => {
-  const textArea = target as HTMLTextAreaElement;
-  console.log("Edit task", textArea.value);
+  const textArea = target as HTMLTextAreaElement,
+    task = textArea.closest(".kanban__task") as HTMLElement,
+    columnId = task.closest(".kanban__column")?.id,
+    taskId = task.dataset.id;
+
+  if (columnId && taskId) {
+    state.updateTaskDescription(columnId, taskId, textArea.value);
+  }
 };
 
 /**

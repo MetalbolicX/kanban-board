@@ -88,6 +88,26 @@ export class State {
   }
 
   /**
+   * Update the description of a task.
+   * @param {string} columnId - The ID of the column.
+   * @param {string} taskId - The ID of the task.
+   * @param {string} description - The new description
+   */
+  public updateTaskDescription(columnId: string, taskId: string, description: string): void {
+    const columns = this._reactiveState.state.columns,
+      column = columns.find((col: column) => col.id === columnId),
+      task = column?.tasks.find((t: task) => t.id === taskId);
+    if (task) {
+      task.description = description;
+      // this._storage.updateTaskDescription(columnId, taskId, description);
+      this._reactiveState.notify({
+        type: "updateTaskDescription",
+        payload: { columnId, taskId, description },
+      })
+    }
+  }
+
+  /**
    * Get all tasks from a column.
    * @param {string} columnId - The ID of the column.
    * @returns {task[]} The tasks in the column.
