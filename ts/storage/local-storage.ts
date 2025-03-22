@@ -9,12 +9,15 @@ export class LocalStorage implements Storage {
    * @param {column[]} columns - The columns to initialize.
    */
   public init(columns: column[]): void {
-    const savedKanbanInfo = localStorage.getItem("kanban-data");
-    if (savedKanbanInfo) {
-      this.#columns = new Map(JSON.parse(savedKanbanInfo));
-      return;
+    const savedTasksInfo = localStorage.getItem("kanban-data");
+    if (savedTasksInfo) {
+      this.#columns = new Map(JSON.parse(savedTasksInfo));
+    } else {
+      for (const column of columns) {
+        this._columns.set(column.id, []);
+      }
+      this.#saveTasksInfo();
     }
-    for (const column of columns) this._columns.set(column.id, []);
   }
 
   /**
@@ -26,7 +29,7 @@ export class LocalStorage implements Storage {
     const tasks = this._columns.get(columnId);
     if (tasks) {
       this._columns.set(columnId, [...tasks, task]);
-      this.#saveState();
+      this.#saveTasksInfo();
     }
   }
 
@@ -38,10 +41,10 @@ export class LocalStorage implements Storage {
   public removeTask(columnId: string, task: task) {
     const tasks = this._columns.get(columnId);
     if (tasks) {
-      const taskIndex = tasks.indexOf(task);
+      const taskIndex = tasks.findIndex((t) => t.id === task.id);
       if (taskIndex > -1) {
         tasks.splice(taskIndex, 1);
-        this.#saveState();
+        this.#saveTasksInfo();
       }
     }
   }
@@ -58,6 +61,23 @@ export class LocalStorage implements Storage {
   }
 
   /**
+   * Updates a task's description.
+   * @param {string} columnId - The ID of the column.
+   * @param {string} taskId - The ID of the task.
+   * @param {string} description - The new description of the task.
+   */
+  public updateTaskDescription(columnId: string, taskId: string, description: string) {
+    const tasks = this._columns.get(columnId);
+    if (tasks) {
+      const task = tasks.find((t) => t.id === taskId);
+      if (task) {
+        task.description = description;
+        this.#saveTasksInfo();
+      }
+    }
+  }
+
+  /**
    * Gets the tasks for the specified column.
    * @param {string} columnId - The ID of the column.
    * @returns {task[]} The tasks in the column.
@@ -70,11 +90,11 @@ export class LocalStorage implements Storage {
    * Saves the current state to local storage.
    * @private
    */
-  #saveState() {
-    const kanbanInfoToSave = JSON.stringify(
+  #saveTasksInfo() {
+    const tasksInfoToSave = JSON.stringify(
       Array.from(this._columns.entries())
     );
-    localStorage.setItem("kanban-data", kanbanInfoToSave);
+    localStorage.setItem("kanban-data", tasksInfoToSave);
   }
 
   /**

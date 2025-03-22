@@ -99,7 +99,7 @@ export class State {
       task = column?.tasks.find((t: task) => t.id === taskId);
     if (task) {
       task.description = description;
-      // this._storage.updateTaskDescription(columnId, taskId, description);
+      this._storage.updateTaskDescription(columnId, taskId, description);
       this._reactiveState.notify({
         type: "updateTaskDescription",
         payload: { columnId, taskId, description },

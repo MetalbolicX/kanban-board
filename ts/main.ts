@@ -1,12 +1,13 @@
 import { createColumn } from "./components/column.ts";
 import { Elym } from "elym";
 import { State } from "./state/state.ts";
-import { MemoryStorage } from "./storage/memory-storage.ts";
+// import { MemoryStorage } from "./storage/memory-storage.ts";
+import { LocalStorage } from "./storage/local-storage.ts";
 import { createTask } from "./components/task.ts";
 
 import type { column } from "./types/kanban-types.ts";
 
-const state = new State(new MemoryStorage());
+const state = new State(new LocalStorage());
 
 const main = () => {
   // Initial data to create the kanban board columns
