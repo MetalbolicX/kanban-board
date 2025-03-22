@@ -43,12 +43,14 @@ const main = () => {
           taskElement = createTask(movedTask),
           afterElement = targetColumn.node().children[targetIndex];
         if (afterElement) {
-          targetColumn
-            .node()
-            .insertBefore(taskElement.root() as HTMLElement, afterElement);
+          targetColumn.insertBefore(taskElement.root() as HTMLElement);
         } else {
           targetColumn.appendElements(taskElement);
         }
+        break;
+      case "updateTaskDescription":
+        const { columnId: sourceColumnId, taskId, description } = change.payload;
+        Elym.select(`#${sourceColumnId} .kanban__task[data-id="${taskId}"] .kanban__task-description`).text(description);
         break;
       default:
         console.error("Invalid change");
