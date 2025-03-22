@@ -91,8 +91,8 @@ const handleAddTask = (columnId: string): void => {
  * @param {column} param - The column data.
  * @returns {Elym} - The created column element.
  */
-const createColumn = ({ id, title }: column): Elym =>
-  new Elym(/*html*/ `
+const createColumn = ({ id, title }: column): Elym => {
+  const column = new Elym(/*html*/ `
     <section class="kanban__column" id="${id}">
       <header class="kanban__title">
         <h2>${title}</h2>
@@ -105,12 +105,20 @@ const createColumn = ({ id, title }: column): Elym =>
       <menu class="kanban__tasks"></menu>
     </section>
   `)
-    .selectChild(".kanban__add-task")
-    .on("click", () => handleAddTask(id))
     .selectChild(".kanban__tasks")
     .on("dragover", (event) => handleDragOver(event as DragEvent))
     .on("drop", (event) => handleDrop(event as DragEvent))
     .appendElements(...state.getTasks(id).map((task) => createTask(task)))
     .backToRoot();
+
+  if (id === "todo") {
+    column
+      .selectChild(".kanban__add-task")
+      .on("click", () => handleAddTask(id))
+      .backToRoot();
+  }
+
+  return column;
+};
 
 export { createColumn };
