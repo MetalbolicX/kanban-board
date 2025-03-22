@@ -17,7 +17,7 @@ export default class ReactiveState {
   }
 
   public subscribe(listener: Listener) {
-    this.#listeners = [...this._listeners, listener];
+    this.#listeners = [...this.#listeners, listener];
   }
 
   public notify(change: change) {
