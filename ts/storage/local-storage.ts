@@ -8,15 +8,13 @@ export class LocalStorage implements Storage {
    * Initializes the local storage with the given columns.
    * @param {column[]} columns - The columns to initialize.
    */
-  init(columns: column[]): void {
-    const savedState = localStorage.getItem("kanbanState");
-    if (savedState) {
-      this.#columns = new Map(JSON.parse(savedState));
+  public init(columns: column[]): void {
+    const savedKanbanInfo = localStorage.getItem("kanban-data");
+    if (savedKanbanInfo) {
+      this.#columns = new Map(JSON.parse(savedKanbanInfo));
       return;
     }
-    columns.forEach(({ id }) => {
-      this._columns.set(id, []);
-    });
+    for (const column of columns) this._columns.set(column.id, []);
   }
 
   /**
@@ -24,7 +22,7 @@ export class LocalStorage implements Storage {
    * @param {string} columnId - The ID of the column.
    * @param {task} task - The task to add.
    */
-  addTask(columnId: string, task: task) {
+  public addTask(columnId: string, task: task) {
     const tasks = this._columns.get(columnId);
     if (tasks) {
       this._columns.set(columnId, [...tasks, task]);
@@ -37,7 +35,7 @@ export class LocalStorage implements Storage {
    * @param {string} columnId - The ID of the column.
    * @param {task} task - The task to remove.
    */
-  removeTask(columnId: string, task: task) {
+  public removeTask(columnId: string, task: task) {
     const tasks = this._columns.get(columnId);
     if (tasks) {
       const taskIndex = tasks.indexOf(task);
@@ -54,7 +52,7 @@ export class LocalStorage implements Storage {
    * @param {string} targetColumnId - The ID of the target column.
    * @param {task} task - The task to move.
    */
-  moveTask(sourceColumnId: string, targetColumnId: string, task: task) {
+  public moveTask(sourceColumnId: string, targetColumnId: string, task: task) {
     this.removeTask(sourceColumnId, task);
     this.addTask(targetColumnId, task);
   }
@@ -64,8 +62,8 @@ export class LocalStorage implements Storage {
    * @param {string} columnId - The ID of the column.
    * @returns {task[]} The tasks in the column.
    */
-  getTasks(columnId: string): task[] {
-    return this._columns.get(columnId) || [];
+  public getTasks(columnId: string): task[] {
+    return this._columns.get(columnId) ?? [];
   }
 
   /**
@@ -73,8 +71,10 @@ export class LocalStorage implements Storage {
    * @private
    */
   #saveState() {
-    const stateToSave = JSON.stringify(Array.from(this._columns.entries()));
-    localStorage.setItem("kanbanState", stateToSave);
+    const kanbanInfoToSave = JSON.stringify(
+      Array.from(this._columns.entries())
+    );
+    localStorage.setItem("kanban-data", kanbanInfoToSave);
   }
 
   /**
