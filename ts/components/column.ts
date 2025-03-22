@@ -47,20 +47,24 @@ const handleDrop = (event: DragEvent): void => {
   const dropZone = (event.target as HTMLElement).closest(".kanban__tasks");
   if (!dropZone) return;
 
-  const task = Elym.select(".kanban__task.dragging"),
-    sourceColumnId = task.node()?.closest(".kanban__column")?.id,
-    targetColumnId = dropZone.closest(".kanban__column")?.id;
+  const task = Elym.select(".kanban__task.dragging");
+  const sourceColumnId = task.node()?.closest(".kanban__column")?.id;
+  const targetColumnId = dropZone.closest(".kanban__column")?.id;
 
-  if (sourceColumnId && targetColumnId) {
-    const afterElement = getDragAfterElement(
-      dropZone as HTMLMenuElement,
-      event.clientY
-    )
-    const targetIndex = afterElement
-      ? Array.from(dropZone.children).indexOf(afterElement)
-      : dropZone.children.length;
+  if (!sourceColumnId || !targetColumnId) return;
 
-    state.moveTask(sourceColumnId, targetColumnId, {
+  const afterElement = getDragAfterElement(
+    dropZone as HTMLElement,
+    event.clientY
+  );
+  const targetIndex = afterElement
+    ? Array.from(dropZone.children).indexOf(afterElement)
+    : dropZone.children.length;
+
+  state.moveTask(
+    sourceColumnId,
+    targetColumnId,
+    {
       id: task.node()?.dataset.id ?? "",
       description:
         (
@@ -68,8 +72,9 @@ const handleDrop = (event: DragEvent): void => {
             .selectChild(".kanban__task-description")
             .node() as HTMLTextAreaElement
         ).value || "",
-    }, targetIndex);
-  }
+    },
+    targetIndex
+  );
 };
 
 /**
@@ -77,7 +82,7 @@ const handleDrop = (event: DragEvent): void => {
  * @param {string} columnId - The ID of the column where the task will be added.
  */
 const handleAddTask = (columnId: string): void => {
-  const task = { id: Date.now().toString() };
+  const task = { id: Date.now().toString(), description: "" };
   state.addTask(columnId, task);
 };
 
