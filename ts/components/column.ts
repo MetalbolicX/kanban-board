@@ -51,7 +51,7 @@ const handleDrop = (event: DragEvent): void => {
   const sourceColumnId = task.node()?.closest(".kanban__column")?.id;
   const targetColumnId = dropZone.closest(".kanban__column")?.id;
 
-  if (!sourceColumnId || !targetColumnId) return;
+  if (!(sourceColumnId && targetColumnId)) return;
 
   const afterElement = getDragAfterElement(
     dropZone as HTMLElement,
