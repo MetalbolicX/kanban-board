@@ -1,7 +1,7 @@
 {
   "version": "4",
   "specifiers": {
-    "npm:elym@^2.1.0": "2.1.0",
+    "npm:elym@^2.2.0": "2.2.0",
     "npm:typescript@^5.8.2": "5.8.2",
     "npm:vite@^6.2.2": "6.2.2"
   },
@@ -141,8 +141,8 @@
     "@types/estree@1.0.6": {
       "integrity": "sha512-AYnb1nQyY49te+VRAVgmzfcgjYS91mY5P0TKUDCLEM+gNnA+3T6rWITXRLYCpahpqSQbN5cE+gHpnPyXjHWxcw=="
     },
-    "elym@2.1.0": {
-      "integrity": "sha512-ba1UO7IFrCSq5BtE8YYiKlCBycqj1u0hCJn+EECp41CV+JK6VDdGE4W/G6iIUxS/5Vatw8JRDlfsPu49OpK7HQ=="
+    "elym@2.2.0": {
+      "integrity": "sha512-i5XmlGYT1pKZLexakm1R8it+qBwYYj5pg4lz44q+PKscQzAivIJ6n15cNggR84/Q62IgbdML9XTGgeczd71DYQ=="
     },
     "esbuild@0.25.1": {
       "integrity": "sha512-BGO5LtrGC7vxnqucAe/rmvKdJllfGaYWdyABvyMoXQlfYMb2bbRuReWR5tEGE//4LcNJj9XrkovTqNYRFZHAMQ==",
@@ -236,7 +236,7 @@
   "workspace": {
     "packageJson": {
       "dependencies": [
-        "npm:elym@^2.1.0",
+        "npm:elym@^2.2.0",
         "npm:typescript@^5.8.2",
         "npm:vite@^6.2.2"
       ]

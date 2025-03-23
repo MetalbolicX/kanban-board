@@ -61,17 +61,15 @@ const handleDrop = (event: DragEvent): void => {
     ? Array.from(dropZone.children).indexOf(afterElement)
     : dropZone.children.length;
 
+  console.log(task.property("data-id"));
+
   stateStore.moveTask(
     sourceColumnId,
     targetColumnId,
     {
       id: task.node()?.dataset.id ?? "",
       description:
-        (
-          task
-            .selectChild(".kanban__task-description")
-            .node() as HTMLTextAreaElement
-        ).value || "",
+        task.selectChild(".kanban__task-description").property("value") || "",
     },
     targetIndex
   );
