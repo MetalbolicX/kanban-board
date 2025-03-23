@@ -1,6 +1,10 @@
 import { Storage } from "../interfaces/storage-interfaces.ts";
 import type { column, task } from "../types/kanban-types.ts";
 
+/**
+ * @classdesc The class is responsible for storing and managing the state of the application.
+ * It uses the strategy design pattern to delegate the storage operations to a storage implementation.
+ */
 export class LocalStorage implements Storage {
   #columns: Map<string, task[]> = new Map();
 
@@ -21,7 +25,7 @@ export class LocalStorage implements Storage {
   }
 
   /**
-   * Adds a task to the specified column.
+   * Adds a new task in the todo column.
    * @param {string} columnId - The ID of the column.
    * @param {task} task - The task to add.
    */
@@ -34,7 +38,7 @@ export class LocalStorage implements Storage {
   }
 
   /**
-   * Removes a task from the specified column.
+   * Removes a task from the specified column when the delete button is clicked.
    * @param {string} columnId - The ID of the column.
    * @param {task} task - The task to remove.
    */

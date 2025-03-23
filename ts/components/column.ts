@@ -1,6 +1,6 @@
 import { Elym } from "elym";
 import { createTask } from "./task.ts";
-import { state } from "../main.ts"; // Import the state instance
+import { stateStore } from "../main.ts"; // Import the state instance
 import type { column } from "../types/kanban-types.ts";
 
 /**
@@ -61,7 +61,7 @@ const handleDrop = (event: DragEvent): void => {
     ? Array.from(dropZone.children).indexOf(afterElement)
     : dropZone.children.length;
 
-  state.moveTask(
+  stateStore.moveTask(
     sourceColumnId,
     targetColumnId,
     {
@@ -75,6 +75,11 @@ const handleDrop = (event: DragEvent): void => {
     },
     targetIndex
   );
+  if (afterElement) {
+    dropZone.insertBefore(task.root() as HTMLElement, afterElement);
+  } else {
+    dropZone.appendChild(task.root());
+  }
 };
 
 /**
@@ -83,7 +88,8 @@ const handleDrop = (event: DragEvent): void => {
  */
 const handleAddTask = (columnId: string): void => {
   const task = { id: Date.now().toString(), description: "" };
-  state.addTask(columnId, task);
+  stateStore.addTask(columnId, task);
+  Elym.select(`#${columnId} .kanban__tasks`).appendElements(createTask(task));
 };
 
 /**
@@ -108,7 +114,7 @@ const createColumn = ({ id, title }: column): Elym => {
     .selectChild(".kanban__tasks")
     .on("dragover", (event) => handleDragOver(event as DragEvent))
     .on("drop", (event) => handleDrop(event as DragEvent))
-    .appendElements(...state.getTasks(id).map((task) => createTask(task)))
+    .appendElements(...stateStore.getTasks(id).map((task) => createTask(task)))
     .backToRoot();
 
   if (id === "todo") {

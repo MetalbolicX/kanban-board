@@ -1,5 +1,5 @@
 import { Elym } from "elym";
-import { state } from "../main.ts";
+import { stateStore } from "../main.ts";
 import type { task } from "../types/kanban-types.ts";
 
 /**
@@ -14,7 +14,7 @@ const handleBlurEdit = ({ target }: Event): void => {
     taskId = task.dataset.id;
 
   if (columnId && taskId) {
-    state.updateTaskDescription(columnId, taskId, textArea.value);
+    stateStore.updateTaskDescription(columnId, taskId, textArea.value);
   }
 };
 
@@ -31,10 +31,11 @@ const handleRemoveTask = ({ target }: Event): void => {
 
   const columnId = task.closest(".kanban__column")?.id;
   if (columnId) {
-    state.removeTask(columnId, {
+    stateStore.removeTask(columnId, {
       id: task.dataset.id ?? "",
     });
   }
+  Elym.fromElement(task).remove();
 };
 
 /**

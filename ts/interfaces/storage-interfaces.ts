@@ -7,7 +7,8 @@ export interface Storage {
   moveTask(
     originColumnId: string,
     destinationColumnId: string,
-    task: task
+    task: task,
+    targetIndex: number
   ): void;
   getTasks(columnId: string): task[];
   updateTaskDescription(
