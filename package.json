@@ -5,21 +5,30 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dist": "tsc && vite build",
+    "preview": "vite preview",
+    "res:build": "rescript",
+    "res:clean": "rescript clean",
+    "res:dev": "rescript -w",
+    "build": "vite build"
   },
   "devDependencies": {
-    "typescript": "^5.8.2",
-    "vite": "^6.2.2"
+    "typescript": "^5.8.3",
+    "vite": "^6.2.6"
   },
-  "packageManager": "pnpm@10.6.1+sha512.40ee09af407fa9fbb5fbfb8e1cb40fbb74c0af0c3e10e9224d7b53c7658528615b2c92450e74cfad91e3a2dcafe3ce4050d80bda71d757756d2ce2b66213e9a3",
+  "packageManager": "pnpm@10.8.0+sha512.0e82714d1b5b43c74610193cb20734897c1d00de89d0e18420aebc5977fa13d780a9cb05734624e81ebd81cc876cd464794850641c48b9544326b5622ca29971",
   "pnpm": {
     "overrides": {},
     "onlyBuiltDependencies": [
-      "esbuild"
+      "esbuild",
+      "rescript"
     ]
   },
   "dependencies": {
-    "elym": "^2.4.2"
+    "@rescript/core": "^1.6.1",
+    "elym": "^2.4.2",
+    "rescript": "^11.1.4",
+    "rescript-vanjs": "^1.0.3",
+    "vanjs-core": "^1.5.3"
   }
 }

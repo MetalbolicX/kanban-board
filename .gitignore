@@ -137,3 +137,8 @@ dist
 
 .qodo/
 .qodo
+
+/lib/
+.bsb.lock
+
+/src/**/*.res.mjs
