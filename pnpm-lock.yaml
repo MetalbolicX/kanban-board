@@ -18,8 +18,8 @@ importers:
         specifier: ^11.1.4
         version: 11.1.4
       rescript-vanjs:
-        specifier: ^1.0.3
-        version: 1.0.3
+        specifier: ^1.0.4
+        version: 1.0.4
       vanjs-core:
         specifier: ^1.5.3
         version: 1.5.3
@@ -316,8 +316,8 @@ packages:
     resolution: {integrity: sha512-dle9A3yYxlBSrt8Fu+IpjGT8SY8hN0mlaA6GY8t0P5PjIOZemULz/E2Bnm/2dcUOena75OTNkHI76uZBNUUq3A==}
     engines: {node: ^10 || ^12 || >=14}
 
-  rescript-vanjs@1.0.3:
-    resolution: {integrity: sha512-fvPoyMHldb955Ghyt9I+nWI01eMUL9pqV2pHpMS06Gt3KfvOTeziG6d/dqI9eJmcAsECXTcJy+4stkAuV3E73Q==}
+  rescript-vanjs@1.0.4:
+    resolution: {integrity: sha512-DZXF72/CNYjuIgQPkpsK8xHcP00gBOR/v47kLWLOAG2GB5/z0F+jNqtBLoFW+N3O0iy/nh5llBD0qzbhRzRM8g==}
 
   rescript@11.1.4:
     resolution: {integrity: sha512-0bGU0bocihjSC6MsE3TMjHjY0EUpchyrREquLS8VsZ3ohSMD+VHUEwimEfB3kpBI1vYkw3UFZ3WD8R28guz/Vw==}
@@ -567,7 +567,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  rescript-vanjs@1.0.3:
+  rescript-vanjs@1.0.4:
     dependencies:
       '@rescript/core': 1.6.1(rescript@11.1.4)
       rescript: 11.1.4

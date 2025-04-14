@@ -28,7 +28,7 @@
     "@rescript/core": "^1.6.1",
     "elym": "^2.4.2",
     "rescript": "^11.1.4",
-    "rescript-vanjs": "^1.0.3",
+    "rescript-vanjs": "^1.0.4",
     "vanjs-core": "^1.5.3"
   }
 }
