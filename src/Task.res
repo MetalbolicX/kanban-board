@@ -24,9 +24,23 @@ let create: task => Dom.element = task => {
       Van.Tags.childFrom(
         #Dom(
           Van.Tags.createTag(
-            ~tagName="button",
-            ~properties={"class": "kanban__task-delete", "type": "button"},
-            ~children=[Van.Tags.childFrom(#Text("🗑"))]
+            ~tagName="div",
+            ~properties={"class": "kanban__task-actions"},
+            ~children=[
+              Van.Tags.childFrom(
+                #Dom(
+                  Van.Tags.createTag(
+                    ~tagName="button",
+                    ~properties={
+                      "class": "kanban__task-delete",
+                      "type": "button",
+                      "onclick": (evt: Dom.event) => Console.log(evt),
+                    },
+                    ~children=[Van.Tags.childFrom(#Text("🗑"))],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
