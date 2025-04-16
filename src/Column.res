@@ -17,49 +17,39 @@ let handleAddTask: string => unit = columnId => {
   }
 }
 
-let create: column => Dom.element = column => {
-  Van.Tags.createTag(
-    ~tagName="section",
-    ~properties={"class": "kanban__column", "id": column.id},
-    ~children=[
-      Van.Tags.childFrom(
-        #Dom(
-          Van.Tags.createTag(
-            ~tagName="header",
-            ~properties={"class": "kanban__title"},
-            ~children=[
-              Van.Tags.childFrom(
-                #Dom(
-                  Van.Tags.createTag(
-                    ~tagName="h2",
-                    ~children=[Van.Tags.childFrom(#Text(column.title))],
-                  ),
-                ),
-              ),
-              Van.Tags.childFrom(
-                if column.id == "todo" {
-                  #Dom(
-                    Van.Tags.createTag(
-                      ~tagName="button",
-                      ~properties={
-                        "class": "kanban__add-task",
-                        "type": "button",
-                        "onclick": _ => handleAddTask(column.id),
-                      },
-                      ~children=[Van.Tags.childFrom(#Text("+ Add"))],
-                    ),
-                  )
-                } else {
-                  #Nil(Null)
-                },
-              ),
-            ],
-          ),
-        ),
-      ),
-      Van.Tags.childFrom(
-        #Dom(Van.Tags.createTag(~tagName="menu", ~properties={"class": "kanban__tasks"})),
-      ),
-    ],
-  )
-}
+// let create: column => Dom.element = column =>
+let create = column =>
+  Van.Dom.createElement("section")
+  ->Van.Dom.withProps({"id": column.id, "class": "kanban__column"})
+  ->Van.Dom.addChildren([
+    Van.Dom.createElement("header")
+    ->Van.Dom.withProps({"class": "kanban__title"})
+    ->Van.Dom.addChild(
+      Van.Dom.createElement("h2")
+      ->Van.Dom.addChild(column.title->Van.Child.toText)
+      ->Van.Dom.build
+      ->Van.Child.toDom,
+    )
+    ->Van.Dom.addChild(
+      if column.id == "todo" {
+        Van.Dom.createElement("button")
+        ->Van.Dom.withProps({
+          "class": "kanban__add-task",
+          "type": "button",
+          "onclick": _ => handleAddTask(column.id),
+        })
+        ->Van.Dom.addChild("+ Add"->Van.Child.toText)
+        ->Van.Dom.build
+        ->Van.Child.toDom
+      } else {
+        Null->Van.Child.toNull
+      },
+    )
+    ->Van.Dom.build
+    ->Van.Child.toDom,
+    Van.Dom.createElement("menu")
+    ->Van.Dom.withProps({"class": "kanban__tasks"})
+    ->Van.Dom.build
+    ->Van.Child.toDom,
+  ])
+  ->Van.Dom.build

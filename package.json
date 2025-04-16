@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "typescript": "^5.8.3",
-    "vite": "^6.2.6"
+    "vite": "^6.3.0"
   },
   "packageManager": "pnpm@10.8.0+sha512.0e82714d1b5b43c74610193cb20734897c1d00de89d0e18420aebc5977fa13d780a9cb05734624e81ebd81cc876cd464794850641c48b9544326b5622ca29971",
   "pnpm": {
@@ -28,7 +28,7 @@
     "@rescript/core": "^1.6.1",
     "elym": "^2.4.2",
     "rescript": "^11.1.4",
-    "rescript-vanjs": "^1.0.4",
+    "rescript-vanjs": "^2.0.0",
     "vanjs-core": "^1.5.3"
   }
 }
