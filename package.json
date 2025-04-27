@@ -14,9 +14,9 @@
   },
   "devDependencies": {
     "typescript": "^5.8.3",
-    "vite": "^6.3.0"
+    "vite": "^6.3.1"
   },
-  "packageManager": "pnpm@10.8.0+sha512.0e82714d1b5b43c74610193cb20734897c1d00de89d0e18420aebc5977fa13d780a9cb05734624e81ebd81cc876cd464794850641c48b9544326b5622ca29971",
+  "packageManager": "pnpm@10.9.0+sha512.0486e394640d3c1fb3c9d43d49cf92879ff74f8516959c235308f5a8f62e2e19528a65cdc2a3058f587cde71eba3d5b56327c8c33a97e4c4051ca48a10ca2d5f",
   "pnpm": {
     "overrides": {},
     "onlyBuiltDependencies": [
@@ -28,7 +28,8 @@
     "@rescript/core": "^1.6.1",
     "elym": "^2.4.2",
     "rescript": "^11.1.4",
-    "rescript-vanjs": "^2.0.0",
+    "rescript-elym": "^1.0.2",
+    "rescript-vanjs": "^2.1.0",
     "vanjs-core": "^1.5.3"
   }
 }

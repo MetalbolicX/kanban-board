@@ -17,9 +17,12 @@ importers:
       rescript:
         specifier: ^11.1.4
         version: 11.1.4
+      rescript-elym:
+        specifier: ^1.0.2
+        version: 1.0.2
       rescript-vanjs:
-        specifier: ^2.0.0
-        version: 2.0.0
+        specifier: ^2.1.0
+        version: 2.1.0
       vanjs-core:
         specifier: ^1.5.3
         version: 1.5.3
@@ -28,8 +31,8 @@ importers:
         specifier: ^5.8.3
         version: 5.8.3
       vite:
-        specifier: ^6.3.0
-        version: 6.3.0
+        specifier: ^6.3.1
+        version: 6.3.1
 
 packages:
 
@@ -328,8 +331,11 @@ packages:
     resolution: {integrity: sha512-dle9A3yYxlBSrt8Fu+IpjGT8SY8hN0mlaA6GY8t0P5PjIOZemULz/E2Bnm/2dcUOena75OTNkHI76uZBNUUq3A==}
     engines: {node: ^10 || ^12 || >=14}
 
-  rescript-vanjs@2.0.0:
-    resolution: {integrity: sha512-RYNsLrRkbuKoRUpJqUIyINjeUWHYVfUAIetPYckItK2j4fTnxz1MHD/59aUwHtQ2ibi0Wd3L7SUbgO/rzkiTBg==}
+  rescript-elym@1.0.2:
+    resolution: {integrity: sha512-fJ9RDjO+CWZY0EwWN3I2TZDlDhc9c9PLOK4O3+V8LAS1zkpT/LSjVrRBPmbVj8i4nPWNu7HvxtCZo6X8i9l4jg==}
+
+  rescript-vanjs@2.1.0:
+    resolution: {integrity: sha512-38jmHZ1Tp/v64dMR9+EcAgau+fOXE+WwIGVA/pqajkCU5XOkIShGVGG4lFOeaVYDQUUyCZgAA5CWH20hpsmYdQ==}
 
   rescript@11.1.4:
     resolution: {integrity: sha512-0bGU0bocihjSC6MsE3TMjHjY0EUpchyrREquLS8VsZ3ohSMD+VHUEwimEfB3kpBI1vYkw3UFZ3WD8R28guz/Vw==}
@@ -357,8 +363,8 @@ packages:
   vanjs-core@1.5.3:
     resolution: {integrity: sha512-NDt++52tE8rA7rcThaFtIJ7C3pEIuB51giOmE9o5dA9Cw3iv+a0tRIVVYP1PGLItXBbEL0wxDTa2VRjjuKIPlw==}
 
-  vite@6.3.0:
-    resolution: {integrity: sha512-9aC0n4pr6hIbvi1YOpFjwQ+QOTGssvbJKoeYkuHHGWwlXfdxQlI8L2qNMo9awEEcCPSiS+5mJZk5jH1PAqoDeQ==}
+  vite@6.3.1:
+    resolution: {integrity: sha512-kkzzkqtMESYklo96HKKPE5KKLkC1amlsqt+RjFMlX2AvbRB/0wghap19NdBxxwGZ+h/C6DLCrcEphPIItlGrRQ==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
     peerDependencies:
@@ -589,7 +595,12 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  rescript-vanjs@2.0.0:
+  rescript-elym@1.0.2:
+    dependencies:
+      '@rescript/core': 1.6.1(rescript@11.1.4)
+      rescript: 11.1.4
+
+  rescript-vanjs@2.1.0:
     dependencies:
       '@rescript/core': 1.6.1(rescript@11.1.4)
       rescript: 11.1.4
@@ -634,7 +645,7 @@ snapshots:
 
   vanjs-core@1.5.3: {}
 
-  vite@6.3.0:
+  vite@6.3.1:
     dependencies:
       esbuild: 0.25.2
       fdir: 6.4.3(picomatch@4.0.2)
