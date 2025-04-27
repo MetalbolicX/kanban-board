@@ -9,6 +9,6 @@
     "in-source": true
   },
   "suffix": ".res.mjs",
-  "bs-dependencies": ["@rescript/core", "rescript-vanjs"],
+  "bs-dependencies": ["@rescript/core", "rescript-vanjs", "rescript-elym"],
   "bsc-flags": ["-open RescriptCore"]
 }

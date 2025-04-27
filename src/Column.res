@@ -10,10 +10,23 @@ external querySelector: string => option<Dom.element> = "querySelector"
 @val @scope(("window", "crypto"))
 external randomUUID: unit => string = "randomUUID"
 
+@send external preventDefault: Dom.dragEvent => unit = "preventDefault"
+@get external getTargetMenu: Dom.dragEvent => Dom.element = "target"
+@send external closest: (Dom.element, string) => option<Dom.element> = "closest"
+
 let handleAddTask: string => unit = columnId => {
   switch querySelector(`#${columnId} .kanban__tasks`) {
   | Some(el) => Van.add(el, Task.create({id: randomUUID(), description: ""}))->ignore
   | None => Console.error(`The column with selector: #${columnId} .kanban__tasks does not exist.`)
+  }
+}
+
+let handleDragOver: Dom.dragEvent => unit = event => {
+  event->preventDefault
+  switch event->getTargetMenu->closest(".kanban__tasks") {
+  | Some(dropZone) =>
+    Elym.select(Dom(dropZone))->Elym.classed("dropzone-active", ~exists=true)->ignore
+  | None => Console.error("No drop zone found")
   }
 }
 
@@ -47,7 +60,17 @@ let create: column => Dom.element = column =>
     ->Van.Dom.build
     ->Van.Child.toDom,
     Van.Dom.createElement("menu")
-    ->Van.Dom.setAttrs({"class": "kanban__tasks"})
+    ->Van.Dom.setAttrs({
+      "class": "kanban__tasks",
+      "ondragover": (event: Dom.dragEvent) => {
+        event->preventDefault
+        switch event->getTargetMenu->closest(".kanban__tasks") {
+        | Some(dropZone) =>
+          Elym.select(Dom(dropZone))->Elym.classed("dropzone-active", ~exists=true)->ignore
+        | None => Console.error("No drop zone found")
+        }
+      },
+    })
     ->Van.Dom.build
     ->Van.Child.toDom,
   ])
